@@ -232,6 +232,7 @@
     line-height: 1.7;
     border-top: 1px solid var(--border);
     padding-top: 12px;
+    white-space: pre-line;
   }
 
   /* 下：縮圖列 */
@@ -369,9 +370,11 @@
 <script>
 const BASE = 'https://biruaruart.github.io/CGY/';
 
-// ★ tags 格式說明：
-//   { text: '標籤文字', h: true }   ← h: true 表示這個標籤會亮（橘色）
-//   { text: '標籤文字', h: false }  ← h: false 表示不亮（暗色）
+// ★ 格式說明：
+//   每張圖片可以有自己的 tags
+//   { src: '圖片路徑', tags: [{ text: '標籤', h: true/false }] }
+//   h: true  → 亮起（橘色）
+//   h: false → 不亮（暗色）
 
 const categories = {
   illustration: {
@@ -379,19 +382,13 @@ const categories = {
     title: '幻想印象派',
     price: 'NTD. 1,500～2,500',
     desc: '厚塗油畫感插畫，色彩豐富，偏灰調。\n作畫時間約 3 週～1 個月。',
-    tags: [
-      { text: '頭像', h: true },
-      { text: '胸像', h: false },
-      { text: '半身', h: false },
-      { text: '全身', h: false },
-    ],
     images: [
-      BASE+'ill_01.jpg',
-      BASE+'ill_02.jpg',
-      BASE+'ill_03.png',
-      BASE+'ill_04.jpg',
-      BASE+'ill_05.jpg',
-      BASE+'ill_06.jpg',
+      { src: BASE+'ill_01.jpg', tags: [{ text: '頭像', h: true }, { text: '委託', h: false }] },
+      { src: BASE+'ill_02.jpg', tags: [{ text: '半身', h: true }, { text: '委託', h: false }] },
+      { src: BASE+'ill_03.png', tags: [{ text: '全身', h: true }, { text: '委託', h: false }] },
+      { src: BASE+'ill_04.jpg', tags: [{ text: '頭像', h: true }, { text: '委託', h: false }] },
+      { src: BASE+'ill_05.jpg', tags: [{ text: '半身', h: true }, { text: '委託', h: false }] },
+      { src: BASE+'ill_06.jpg', tags: [{ text: '全身', h: true }, { text: '委託', h: false }] },
     ]
   },
   doodle: {
@@ -399,14 +396,10 @@ const categories = {
     title: '塗鴉',
     price: 'NTD. 400',
     desc: '隨性筆觸，依照設定給我的心理感受繪製。\n無法更改任何項目。\n作畫時間約 1～2 週。',
-    tags: [
-      { text: '單人', h: true },
-      { text: '滿板', h: false },
-    ],
     images: [
-      BASE+'doo_01.jpg',
-      BASE+'doo_02.jpg',
-      BASE+'doo_03.jpg',
+      { src: BASE+'doo_01.jpg', tags: [{ text: '單人', h: true }] },
+      { src: BASE+'doo_02.jpg', tags: [{ text: '單人', h: true }] },
+      { src: BASE+'doo_03.jpg', tags: [{ text: '滿板', h: true }] },
     ]
   },
   light: {
@@ -414,17 +407,12 @@ const categories = {
     title: '小品插畫',
     price: 'NTD. 600～800',
     desc: '有構圖、有氛圍，完成度較高的輕量委託。\n可給主題或元素，其餘由畫師自由發揮。\n作畫時間約 1～2 週。',
-    tags: [
-      { text: '單人', h: true },
-      { text: '滿板', h: false },
-      { text: '氛圍感', h: false },
-    ],
     images: [
-      BASE+'light_01.jpg',
-      BASE+'light_02.jpg',
-      BASE+'light_03.jpg',
-      BASE+'light_04.jpg',
-      BASE+'light_05.jpg',
+      { src: BASE+'light_01.jpg', tags: [{ text: '單人', h: true }, { text: '氛圍感', h: false }] },
+      { src: BASE+'light_02.jpg', tags: [{ text: '單人', h: true }, { text: '氛圍感', h: false }] },
+      { src: BASE+'light_03.jpg', tags: [{ text: '滿板', h: true }, { text: '氛圍感', h: false }] },
+      { src: BASE+'light_04.jpg', tags: [{ text: '單人', h: true }, { text: '氛圍感', h: false }] },
+      { src: BASE+'light_05.jpg', tags: [{ text: '滿板', h: true }, { text: '氛圍感', h: false }] },
     ]
   },
   charaD: {
@@ -432,13 +420,8 @@ const categories = {
     title: '角色設計',
     price: 'NTD. 3,000～5,000',
     desc: '需提供基本設定。\n包含正面、背面、表情x3、胸像、色票。\n作畫時間約 1 個月。',
-    tags: [
-      { text: '角色外觀', h: true },
-      { text: '純文字設定', h: false },
-      { text: '設定包', h: false },
-    ],
     images: [
-      BASE+'charaD_01.jpg',
+      { src: BASE+'charaD_01.jpg', tags: [{ text: '角色外觀', h: true }, { text: '設定包', h: false }] },
     ]
   },
   sur: {
@@ -446,15 +429,9 @@ const categories = {
     title: '新藝術驚喜包',
     price: 'NTD. 1,000～2,000',
     desc: '需提供角色設定與故事。\n皆有背景、框飾、花卉，可選擇是否放上名字。\n作畫時間約 1 個月。',
-    tags: [
-      { text: '頭像', h: true },
-      { text: '半身', h: false },
-      { text: '全身', h: false },
-      { text: '自由發揮', h: false },
-    ],
     images: [
-      BASE+'sur_01.png',
-      BASE+'sur_02.png',
+      { src: BASE+'sur_01.png', tags: [{ text: '頭像', h: true }, { text: '自由發揮', h: false }] },
+      { src: BASE+'sur_02.png', tags: [{ text: '半身', h: true }, { text: '自由發揮', h: false }] },
     ]
   },
   surf: {
@@ -462,15 +439,11 @@ const categories = {
     title: '花卉驚喜包',
     price: 'NTD. 1,000',
     desc: '花卉為主題的驚喜包。\n需提供角色設定，其餘由畫師自由發揮。\n作畫時間約 1 個月。',
-    tags: [
-      { text: '花卉', h: true },
-      { text: '自由發揮', h: false },
-    ],
     images: [
-      BASE+'surf_01.png',
-      BASE+'surf_02.png',
-      BASE+'surf_03.png',
-      BASE+'surf_04.png',
+      { src: BASE+'surf_01.png', tags: [{ text: '花卉', h: true }, { text: '自由發揮', h: false }] },
+      { src: BASE+'surf_02.png', tags: [{ text: '花卉', h: true }, { text: '自由發揮', h: false }] },
+      { src: BASE+'surf_03.png', tags: [{ text: '花卉', h: true }, { text: '自由發揮', h: false }] },
+      { src: BASE+'surf_04.png', tags: [{ text: '花卉', h: true }, { text: '自由發揮', h: false }] },
     ]
   },
   pixel: {
@@ -478,16 +451,11 @@ const categories = {
     title: '點陣驚喜包',
     price: 'NTD. 450',
     desc: '名牌、塔羅、紋樣。\n請參考各版型。\n作畫時間約 2 週。',
-    tags: [
-      { text: '名牌', h: true },
-      { text: '塔羅', h: false },
-      { text: '紋樣', h: false },
-    ],
     images: [
-      BASE+'pixel_01.jpg',
-      BASE+'pixel_02.jpg',
-      BASE+'pixel_03.jpg',
-      BASE+'pixel_04.jpg',
+      { src: BASE+'pixel_01.jpg', tags: [{ text: '名牌', h: true }] },
+      { src: BASE+'pixel_02.jpg', tags: [{ text: '塔羅', h: true }] },
+      { src: BASE+'pixel_03.jpg', tags: [{ text: '紋樣', h: true }] },
+      { src: BASE+'pixel_04.jpg', tags: [{ text: '名牌', h: true }] },
     ]
   },
   chibi: {
@@ -495,15 +463,11 @@ const categories = {
     title: 'Q版插畫',
     price: 'NTD. 600～1,200',
     desc: 'Q版風格插畫。\n作畫時間約 1～2 週。',
-    tags: [
-      { text: 'Q版', h: true },
-      { text: '可愛風', h: false },
-    ],
     images: [
-      BASE+'chibi_01.jpg',
-      BASE+'chibi_02.jpg',
-      BASE+'chibi_03.jpg',
-      BASE+'chibi_04.jpg',
+      { src: BASE+'chibi_01.jpg', tags: [{ text: 'Q版', h: true }] },
+      { src: BASE+'chibi_02.jpg', tags: [{ text: 'Q版', h: true }] },
+      { src: BASE+'chibi_03.jpg', tags: [{ text: 'Q版', h: true }] },
+      { src: BASE+'chibi_04.jpg', tags: [{ text: 'Q版', h: true }] },
     ]
   },
   lineA: {
@@ -511,11 +475,8 @@ const categories = {
     title: '線稿',
     price: '依需求訂定',
     desc: '線稿委託，詳情請來信洽詢。',
-    tags: [
-      { text: '線稿', h: true },
-    ],
     images: [
-      BASE+'lineA_01.jpg',
+      { src: BASE+'lineA_01.jpg', tags: [{ text: '線稿', h: true }] },
     ]
   },
 };
@@ -541,28 +502,29 @@ function navigate(dir) {
 function render() {
   const data = categories[currentCategory];
   const imgs = data.images;
+  const current = imgs[currentIndex];
 
-  document.getElementById('mainImg').src = imgs[currentIndex];
+  document.getElementById('mainImg').src = current.src;
   document.getElementById('infoCategory').textContent = data.label;
   document.getElementById('infoTitle').textContent = data.title;
   document.getElementById('infoPrice').textContent = data.price;
   document.getElementById('infoDesc').textContent = data.desc;
 
-  // 箭頭顯示邏輯（只有一張圖時隱藏）
+  // 箭頭顯示
   document.getElementById('prevBtn').classList.toggle('hidden', imgs.length <= 1);
   document.getElementById('nextBtn').classList.toggle('hidden', imgs.length <= 1);
 
-  // tags 渲染
+  // tags：每張圖片各自的 tags
   const tagsEl = document.getElementById('infoTags');
-  tagsEl.innerHTML = data.tags.map(t =>
+  tagsEl.innerHTML = current.tags.map(t =>
     `<span class="tag ${t.h ? 'highlight' : ''}">${t.text}</span>`
   ).join('');
 
-  // 縮圖渲染
+  // 縮圖
   const thumbsEl = document.getElementById('thumbnails');
-  thumbsEl.innerHTML = imgs.map((src, i) =>
+  thumbsEl.innerHTML = imgs.map((img, i) =>
     `<div class="thumb ${i === currentIndex ? 'active' : ''}" onclick="selectThumb(${i})">
-      <img src="${src}" alt="縮圖${i+1}">
+      <img src="${img.src}" alt="縮圖${i+1}">
     </div>`
   ).join('');
 }
@@ -573,7 +535,7 @@ function selectThumb(i) {
 }
 
 function openLightbox() {
-  const src = categories[currentCategory].images[currentIndex];
+  const src = categories[currentCategory].images[currentIndex].src;
   document.getElementById('lightboxImg').src = src;
   document.getElementById('lightbox').classList.add('open');
 }
@@ -582,7 +544,6 @@ function closeLightbox() {
   document.getElementById('lightbox').classList.remove('open');
 }
 
-// 初始化
 render();
 </script>
 </body>
