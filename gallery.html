@@ -1,0 +1,447 @@
+<!DOCTYPE html>
+<html lang="zh-TW">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Biru Gallery</title>
+<style>
+  @import url('https://fonts.googleapis.com/css2?family=Cinzel:wght@400;600&family=Noto+Sans+TC:wght@300;400;500&display=swap');
+
+  :root {
+    --bg: #0e0e0f;
+    --surface: #161618;
+    --surface2: #1e1e21;
+    --border: #2a2a2e;
+    --accent: #c084fc;
+    --accent2: #e879f9;
+    --text: #e8e8ec;
+    --text-dim: #8888a0;
+    --red: #ef4444;
+  }
+
+  * { box-sizing: border-box; margin: 0; padding: 0; }
+
+  body {
+    background: var(--bg);
+    color: var(--text);
+    font-family: 'Noto Sans TC', sans-serif;
+    min-height: 100vh;
+    padding: 24px 20px;
+  }
+
+  /* ── 分類頁籤 ── */
+  .tabs {
+    display: flex;
+    gap: 6px;
+    margin-bottom: 20px;
+    flex-wrap: wrap;
+  }
+
+  .tab-btn {
+    background: var(--surface);
+    border: 1px solid var(--border);
+    color: var(--text-dim);
+    padding: 6px 16px;
+    font-size: 12px;
+    font-family: 'Noto Sans TC', sans-serif;
+    letter-spacing: 0.08em;
+    cursor: pointer;
+    transition: all 0.2s;
+    clip-path: polygon(8px 0%, 100% 0%, calc(100% - 8px) 100%, 0% 100%);
+  }
+
+  .tab-btn:hover {
+    border-color: var(--accent);
+    color: var(--accent);
+  }
+
+  .tab-btn.active {
+    background: linear-gradient(135deg, #581c87, #4a044e);
+    border-color: var(--accent);
+    color: var(--accent);
+  }
+
+  /* ── 主體區 ── */
+  .viewer {
+    display: grid;
+    grid-template-columns: 1fr 280px;
+    grid-template-rows: auto auto;
+    gap: 12px;
+  }
+
+  /* 左：大圖 */
+  .main-image-wrap {
+    grid-column: 1;
+    grid-row: 1;
+    position: relative;
+    background: var(--surface);
+    border: 1px solid var(--border);
+    aspect-ratio: 1 / 1;
+    overflow: hidden;
+    cursor: zoom-in;
+  }
+
+  .main-image-wrap::before {
+    content: '';
+    position: absolute;
+    inset: 0;
+    background: linear-gradient(135deg, transparent 60%, rgba(192,132,252,0.06));
+    z-index: 1;
+    pointer-events: none;
+  }
+
+  .corner {
+    position: absolute;
+    width: 14px; height: 14px;
+    border-color: var(--accent);
+    border-style: solid;
+    z-index: 2;
+    opacity: 0.6;
+  }
+  .corner.tl { top: 8px; left: 8px; border-width: 1px 0 0 1px; }
+  .corner.tr { top: 8px; right: 8px; border-width: 1px 1px 0 0; }
+  .corner.bl { bottom: 8px; left: 8px; border-width: 0 0 1px 1px; }
+  .corner.br { bottom: 8px; right: 8px; border-width: 0 1px 1px 0; }
+
+  .main-image-wrap img {
+    width: 100%; height: 100%;
+    object-fit: cover;
+    display: block;
+    transition: transform 0.4s ease;
+  }
+
+  .main-image-wrap:hover img { transform: scale(1.03); }
+
+  .zoom-hint {
+    position: absolute;
+    bottom: 10px; right: 10px;
+    background: rgba(0,0,0,0.6);
+    border: 1px solid var(--border);
+    color: var(--text-dim);
+    font-size: 10px;
+    padding: 3px 8px;
+    letter-spacing: 0.1em;
+    z-index: 2;
+  }
+
+  /* 右：說明 */
+  .info-panel {
+    grid-column: 2;
+    grid-row: 1;
+    background: var(--surface);
+    border: 1px solid var(--border);
+    padding: 20px;
+    display: flex;
+    flex-direction: column;
+    gap: 14px;
+    position: relative;
+    overflow: hidden;
+  }
+
+  .info-panel::after {
+    content: '';
+    position: absolute;
+    top: 0; left: 0;
+    width: 2px; height: 100%;
+    background: linear-gradient(to bottom, var(--accent), transparent);
+  }
+
+  .info-category {
+    font-size: 10px;
+    letter-spacing: 0.2em;
+    color: var(--accent);
+    text-transform: uppercase;
+  }
+
+  .info-title {
+    font-family: 'Cinzel', serif;
+    font-size: 16px;
+    font-weight: 600;
+    color: var(--text);
+    line-height: 1.4;
+    border-bottom: 1px solid var(--border);
+    padding-bottom: 12px;
+  }
+
+  .info-price {
+    display: flex;
+    flex-direction: column;
+    gap: 6px;
+  }
+
+  .price-label {
+    font-size: 10px;
+    color: var(--text-dim);
+    letter-spacing: 0.15em;
+  }
+
+  .price-value {
+    font-size: 18px;
+    color: var(--accent2);
+    font-weight: 500;
+  }
+
+  .info-tags {
+    display: flex;
+    flex-wrap: wrap;
+    gap: 6px;
+    margin-top: auto;
+  }
+
+  .tag {
+    font-size: 10px;
+    padding: 3px 10px;
+    border: 1px solid var(--border);
+    color: var(--text-dim);
+    letter-spacing: 0.08em;
+  }
+
+  .tag.highlight {
+    border-color: var(--accent);
+    color: var(--accent);
+  }
+
+  .info-desc {
+    font-size: 12px;
+    color: var(--text-dim);
+    line-height: 1.7;
+    border-top: 1px solid var(--border);
+    padding-top: 12px;
+  }
+
+  /* 下：縮圖列 */
+  .thumbnails {
+    grid-column: 1;
+    grid-row: 2;
+    display: flex;
+    gap: 8px;
+    flex-wrap: wrap;
+  }
+
+  .thumb {
+    width: 72px; height: 72px;
+    border: 1px solid var(--border);
+    overflow: hidden;
+    cursor: pointer;
+    position: relative;
+    flex-shrink: 0;
+    transition: border-color 0.2s;
+  }
+
+  .thumb img {
+    width: 100%; height: 100%;
+    object-fit: cover;
+    display: block;
+    transition: transform 0.3s;
+    filter: brightness(0.75);
+  }
+
+  .thumb:hover img { transform: scale(1.08); filter: brightness(1); }
+
+  .thumb.active {
+    border-color: var(--accent);
+  }
+
+  .thumb.active img { filter: brightness(1); }
+
+  .thumb.active::after {
+    content: '';
+    position: absolute;
+    inset: 0;
+    border: 2px solid var(--accent);
+    pointer-events: none;
+  }
+
+  /* ── Lightbox ── */
+  .lightbox {
+    display: none;
+    position: fixed;
+    inset: 0;
+    background: rgba(0,0,0,0.92);
+    z-index: 100;
+    align-items: center;
+    justify-content: center;
+    cursor: zoom-out;
+  }
+
+  .lightbox.open { display: flex; }
+
+  .lightbox img {
+    max-width: 90vw;
+    max-height: 90vh;
+    object-fit: contain;
+    border: 1px solid var(--border);
+  }
+
+  .lightbox-close {
+    position: fixed;
+    top: 20px; right: 24px;
+    font-size: 24px;
+    color: var(--text-dim);
+    cursor: pointer;
+    z-index: 101;
+    transition: color 0.2s;
+  }
+
+  .lightbox-close:hover { color: var(--accent); }
+
+  /* ── 響應式 ── */
+  @media (max-width: 640px) {
+    .viewer { grid-template-columns: 1fr; }
+    .info-panel { grid-column: 1; grid-row: 2; }
+    .thumbnails { grid-row: 3; }
+  }
+</style>
+</head>
+<body>
+
+<!-- 分類頁籤 -->
+<div class="tabs">
+  <button class="tab-btn active" onclick="switchCategory('illustration')">插畫委託</button>
+  <button class="tab-btn" onclick="switchCategory('surprise')">驚喜包</button>
+  <button class="tab-btn" onclick="switchCategory('light')">小品委託</button>
+  <button class="tab-btn" onclick="switchCategory('pixel')">點陣驚喜包</button>
+</div>
+
+<!-- 主檢視區 -->
+<div class="viewer">
+  <div class="main-image-wrap" onclick="openLightbox()">
+    <div class="corner tl"></div>
+    <div class="corner tr"></div>
+    <div class="corner bl"></div>
+    <div class="corner br"></div>
+    <img id="mainImg" src="" alt="主圖">
+    <div class="zoom-hint">CLICK TO ZOOM</div>
+  </div>
+
+  <div class="info-panel">
+    <div class="info-category" id="infoCategory">ILLUSTRATION</div>
+    <div class="info-title" id="infoTitle">幻想印象派</div>
+    <div class="info-price">
+      <div class="price-label">PRICE FROM</div>
+      <div class="price-value" id="infoPrice">NTD. 1,500</div>
+    </div>
+    <div class="info-desc" id="infoDesc">厚塗油畫感插畫，色彩豐富，偏灰調。作畫時間約 3 週～1 個月。</div>
+    <div class="info-tags" id="infoTags"></div>
+  </div>
+
+  <div class="thumbnails" id="thumbnails"></div>
+</div>
+
+<!-- Lightbox -->
+<div class="lightbox" id="lightbox" onclick="closeLightbox()">
+  <div class="lightbox-close" onclick="closeLightbox()">✕</div>
+  <img id="lightboxImg" src="" alt="放大圖">
+</div>
+
+<script>
+// ── 資料設定區（在這裡填入您的圖片網址） ──
+const categories = {
+  illustration: {
+    label: 'ILLUSTRATION',
+    title: '幻想印象派',
+    price: 'NTD. 1,500～2,500',
+    desc: '厚塗油畫感插畫，色彩豐富，偏灰調。\n作畫時間約 3 週～1 個月。',
+    tags: ['頭像', '胸像', '半身', '全身'],
+    // ★ 請把下方的圖片網址換成您自己的作品連結
+    images: [
+      'https://placekitten.com/600/600',
+      'https://placekitten.com/601/601',
+      'https://placekitten.com/602/602',
+      'https://placekitten.com/603/603',
+      'https://placekitten.com/604/604',
+    ]
+  },
+  surprise: {
+    label: 'SURPRISE BOX',
+    title: '慕夏藝術驚喜包',
+    price: 'NTD. 1,000～2,000',
+    desc: '需提供角色設定與故事。\n皆有背景、框飾、花卉，可選擇是否放上名字。\n作畫時間約 1 個月。',
+    tags: ['頭像', '半身', '全身', '自由發揮'],
+    images: [
+      'https://placekitten.com/605/605',
+      'https://placekitten.com/606/606',
+      'https://placekitten.com/607/607',
+    ]
+  },
+  light: {
+    label: 'LIGHT COMMISSION',
+    title: '小品委託',
+    price: 'NTD. 400～1,000',
+    desc: '依照設定給我的心理感受繪製。\n可給主題或元素，其餘由畫師自由發揮。\n作畫時間約 1～2 週。',
+    tags: ['單人', '滿板', '心象'],
+    images: [
+      'https://placekitten.com/608/608',
+      'https://placekitten.com/609/609',
+      'https://placekitten.com/610/610',
+    ]
+  },
+  pixel: {
+    label: 'PIXEL ART',
+    title: '點陣驚喜包',
+    price: 'NTD. 450',
+    desc: '名牌、塔羅、紋樣。\n請參考各版型。\n作畫時間約 2 週。',
+    tags: ['名牌', '塔羅', '紋樣'],
+    images: [
+      'https://placekitten.com/611/611',
+      'https://placekitten.com/612/612',
+      'https://placekitten.com/613/613',
+    ]
+  }
+};
+
+let currentCategory = 'illustration';
+let currentIndex = 0;
+
+function switchCategory(cat) {
+  currentCategory = cat;
+  currentIndex = 0;
+  document.querySelectorAll('.tab-btn').forEach((btn, i) => {
+    btn.classList.toggle('active', Object.keys(categories)[i] === cat);
+  });
+  render();
+}
+
+function render() {
+  const data = categories[currentCategory];
+  const imgs = data.images;
+
+  document.getElementById('mainImg').src = imgs[currentIndex];
+  document.getElementById('infoCategory').textContent = data.label;
+  document.getElementById('infoTitle').textContent = data.title;
+  document.getElementById('infoPrice').textContent = data.price;
+  document.getElementById('infoDesc').textContent = data.desc;
+
+  const tagsEl = document.getElementById('infoTags');
+  tagsEl.innerHTML = data.tags.map((t, i) =>
+    `<span class="tag ${i === 0 ? 'highlight' : ''}">${t}</span>`
+  ).join('');
+
+  const thumbsEl = document.getElementById('thumbnails');
+  thumbsEl.innerHTML = imgs.map((src, i) =>
+    `<div class="thumb ${i === currentIndex ? 'active' : ''}" onclick="selectThumb(${i})">
+      <img src="${src}" alt="縮圖${i+1}">
+    </div>`
+  ).join('');
+}
+
+function selectThumb(i) {
+  currentIndex = i;
+  render();
+}
+
+function openLightbox() {
+  const src = categories[currentCategory].images[currentIndex];
+  document.getElementById('lightboxImg').src = src;
+  document.getElementById('lightbox').classList.add('open');
+}
+
+function closeLightbox() {
+  document.getElementById('lightbox').classList.remove('open');
+}
+
+// 初始化
+render();
+</script>
+</body>
+</html>
