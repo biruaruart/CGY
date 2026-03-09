@@ -8,15 +8,15 @@
   @import url('https://fonts.googleapis.com/css2?family=Cinzel:wght@400;600&family=Noto+Sans+TC:wght@300;400;500&display=swap');
 
   :root {
-    --bg: #0e0e0f;
-    --surface: #161618;
-    --surface2: #1e1e21;
-    --border: #2a2a2e;
-    --accent: #c084fc;
-    --accent2: #e879f9;
-    --text: #e8e8ec;
-    --text-dim: #8888a0;
-    --red: #ef4444;
+    --bg: #0a0f0e;
+    --surface: #111a18;
+    --surface2: #182420;
+    --border: #1e3330;
+    --accent: #2dd4bf;
+    --accent2: #e8633a;
+    --accent3: #5eead4;
+    --text: #e0f2f0;
+    --text-dim: #6b9e98;
   }
 
   * { box-sizing: border-box; margin: 0; padding: 0; }
@@ -56,7 +56,7 @@
   }
 
   .tab-btn.active {
-    background: linear-gradient(135deg, #581c87, #4a044e);
+    background: linear-gradient(135deg, #0d3d36, #1a2e20);
     border-color: var(--accent);
     color: var(--accent);
   }
@@ -85,7 +85,7 @@
     content: '';
     position: absolute;
     inset: 0;
-    background: linear-gradient(135deg, transparent 60%, rgba(192,132,252,0.06));
+    background: linear-gradient(135deg, transparent 60%, rgba(45,212,191,0.06));
     z-index: 1;
     pointer-events: none;
   }
@@ -298,9 +298,14 @@
 <!-- 分類頁籤 -->
 <div class="tabs">
   <button class="tab-btn active" onclick="switchCategory('illustration')">插畫委託</button>
-  <button class="tab-btn" onclick="switchCategory('surprise')">驚喜包</button>
-  <button class="tab-btn" onclick="switchCategory('light')">小品委託</button>
+  <button class="tab-btn" onclick="switchCategory('doodle')">塗鴉</button>
+  <button class="tab-btn" onclick="switchCategory('light')">小品插畫</button>
+  <button class="tab-btn" onclick="switchCategory('charaD')">角色設計</button>
+  <button class="tab-btn" onclick="switchCategory('sur')">新藝術驚喜包</button>
+  <button class="tab-btn" onclick="switchCategory('surf')">花卉驚喜包</button>
   <button class="tab-btn" onclick="switchCategory('pixel')">點陣驚喜包</button>
+  <button class="tab-btn" onclick="switchCategory('chibi')">Q版</button>
+  <button class="tab-btn" onclick="switchCategory('lineA')">線稿</button>
 </div>
 
 <!-- 主檢視區 -->
@@ -335,7 +340,8 @@
 </div>
 
 <script>
-// ── 資料設定區（在這裡填入您的圖片網址） ──
+const BASE = 'https://biruaruart.github.io/CGY/';
+
 const categories = {
   illustration: {
     label: 'ILLUSTRATION',
@@ -343,37 +349,73 @@ const categories = {
     price: 'NTD. 1,500～2,500',
     desc: '厚塗油畫感插畫，色彩豐富，偏灰調。\n作畫時間約 3 週～1 個月。',
     tags: ['頭像', '胸像', '半身', '全身'],
-    // ★ 請把下方的圖片網址換成您自己的作品連結
     images: [
-      'https://placekitten.com/600/600',
-      'https://placekitten.com/601/601',
-      'https://placekitten.com/602/602',
-      'https://placekitten.com/603/603',
-      'https://placekitten.com/604/604',
+      BASE+'ill_01.jpg',
+      BASE+'ill_02.jpg',
+      BASE+'ill_03.png',
+      BASE+'ill_04.jpg',
+      BASE+'ill_05.jpg',
+      BASE+'ill_06.jpg',
     ]
   },
-  surprise: {
-    label: 'SURPRISE BOX',
-    title: '慕夏藝術驚喜包',
+  doodle: {
+    label: 'DOODLE',
+    title: '塗鴉',
+    price: 'NTD. 400',
+    desc: '隨性筆觸，依照設定給我的心理感受繪製。\n無法更改任何項目。\n作畫時間約 1～2 週。',
+    tags: ['單人', '滿板'],
+    images: [
+      BASE+'doo_01.jpg',
+      BASE+'doo_02.jpg',
+      BASE+'doo_03.jpg',
+    ]
+  },
+  light: {
+    label: 'LIGHT ILLUST',
+    title: '小品插畫',
+    price: 'NTD. 600～800',
+    desc: '有構圖、有氛圍，完成度較高的輕量委託。\n可給主題或元素，其餘由畫師自由發揮。\n作畫時間約 1～2 週。',
+    tags: ['單人', '滿板', '氛圍感'],
+    images: [
+      BASE+'light_01.jpg',
+      BASE+'light_02.jpg',
+      BASE+'light_03.jpg',
+      BASE+'light_04.jpg',
+      BASE+'light_05.jpg',
+    ]
+  },
+  charaD: {
+    label: 'CHARACTER DESIGN',
+    title: '角色設計',
+    price: 'NTD. 3,000～5,000',
+    desc: '需提供基本設定。\n包含正面、背面、表情x3、胸像、色票。\n作畫時間約 1 個月。',
+    tags: ['角色外觀', '純文字設定', '設定包'],
+    images: [
+      BASE+'charaD_01.jpg',
+    ]
+  },
+  sur: {
+    label: 'ART NOUVEAU BOX',
+    title: '新藝術驚喜包',
     price: 'NTD. 1,000～2,000',
     desc: '需提供角色設定與故事。\n皆有背景、框飾、花卉，可選擇是否放上名字。\n作畫時間約 1 個月。',
     tags: ['頭像', '半身', '全身', '自由發揮'],
     images: [
-      'https://placekitten.com/605/605',
-      'https://placekitten.com/606/606',
-      'https://placekitten.com/607/607',
+      BASE+'sur_01.png',
+      BASE+'sur_02.png',
     ]
   },
-  light: {
-    label: 'LIGHT COMMISSION',
-    title: '小品委託',
-    price: 'NTD. 400～1,000',
-    desc: '依照設定給我的心理感受繪製。\n可給主題或元素，其餘由畫師自由發揮。\n作畫時間約 1～2 週。',
-    tags: ['單人', '滿板', '心象'],
+  surf: {
+    label: 'FLORAL BOX',
+    title: '花卉驚喜包',
+    price: 'NTD. 1,000',
+    desc: '花卉為主題的驚喜包。\n需提供角色設定，其餘由畫師自由發揮。\n作畫時間約 1 個月。',
+    tags: ['花卉', '自由發揮'],
     images: [
-      'https://placekitten.com/608/608',
-      'https://placekitten.com/609/609',
-      'https://placekitten.com/610/610',
+      BASE+'surf_01.png',
+      BASE+'surf_02.png',
+      BASE+'surf_03.png',
+      BASE+'surf_04.png',
     ]
   },
   pixel: {
@@ -383,11 +425,35 @@ const categories = {
     desc: '名牌、塔羅、紋樣。\n請參考各版型。\n作畫時間約 2 週。',
     tags: ['名牌', '塔羅', '紋樣'],
     images: [
-      'https://placekitten.com/611/611',
-      'https://placekitten.com/612/612',
-      'https://placekitten.com/613/613',
+      BASE+'pixel_01.jpg',
+      BASE+'pixel_02.jpg',
+      BASE+'pixel_03.jpg',
+      BASE+'pixel_04.jpg',
     ]
-  }
+  },
+  chibi: {
+    label: 'CHIBI / Q版',
+    title: 'Q版插畫',
+    price: 'NTD. 600～1,200',
+    desc: 'Q版風格插畫。\n作畫時間約 1～2 週。',
+    tags: ['Q版', '可愛風'],
+    images: [
+      BASE+'chibi_01.jpg',
+      BASE+'chibi_02.jpg',
+      BASE+'chibi_03.jpg',
+      BASE+'chibi_04.jpg',
+    ]
+  },
+  lineA: {
+    label: 'LINE ART',
+    title: '線稿',
+    price: '依需求訂定',
+    desc: '線稿委託，詳情請來信洽詢。',
+    tags: ['線稿'],
+    images: [
+      BASE+'lineA_01.jpg',
+    ]
+  },
 };
 
 let currentCategory = 'illustration';
