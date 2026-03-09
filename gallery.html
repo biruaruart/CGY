@@ -124,6 +124,31 @@
     z-index: 2;
   }
 
+  /* ── 左右箭頭 ── */
+  .nav-btn {
+    position: absolute;
+    top: 50%;
+    transform: translateY(-50%);
+    background: rgba(0,0,0,0.45);
+    border: 1px solid var(--border);
+    color: var(--text-dim);
+    width: 28px; height: 48px;
+    display: flex; align-items: center; justify-content: center;
+    cursor: pointer;
+    z-index: 3;
+    transition: all 0.2s;
+    font-size: 14px;
+    user-select: none;
+  }
+  .nav-btn:hover {
+    background: rgba(45,212,191,0.15);
+    border-color: var(--accent);
+    color: var(--accent);
+  }
+  .nav-btn.prev { left: 0; }
+  .nav-btn.next { right: 0; }
+  .nav-btn.hidden { opacity: 0; pointer-events: none; }
+
   /* 右：說明 */
   .info-panel {
     grid-column: 2;
@@ -310,12 +335,14 @@
 
 <!-- 主檢視區 -->
 <div class="viewer">
-  <div class="main-image-wrap" onclick="openLightbox()">
+  <div class="main-image-wrap">
     <div class="corner tl"></div>
     <div class="corner tr"></div>
     <div class="corner bl"></div>
     <div class="corner br"></div>
-    <img id="mainImg" src="" alt="主圖">
+    <div class="nav-btn prev" id="prevBtn" onclick="navigate(-1)">‹</div>
+    <img id="mainImg" src="" alt="主圖" onclick="openLightbox()" style="cursor:zoom-in;">
+    <div class="nav-btn next" id="nextBtn" onclick="navigate(1)">›</div>
     <div class="zoom-hint">CLICK TO ZOOM</div>
   </div>
 
@@ -342,13 +369,22 @@
 <script>
 const BASE = 'https://biruaruart.github.io/CGY/';
 
+// ★ tags 格式說明：
+//   { text: '標籤文字', h: true }   ← h: true 表示這個標籤會亮（橘色）
+//   { text: '標籤文字', h: false }  ← h: false 表示不亮（暗色）
+
 const categories = {
   illustration: {
     label: 'ILLUSTRATION',
     title: '幻想印象派',
     price: 'NTD. 1,500～2,500',
     desc: '厚塗油畫感插畫，色彩豐富，偏灰調。\n作畫時間約 3 週～1 個月。',
-    tags: ['頭像', '胸像', '半身', '全身'],
+    tags: [
+      { text: '頭像', h: true },
+      { text: '胸像', h: false },
+      { text: '半身', h: false },
+      { text: '全身', h: false },
+    ],
     images: [
       BASE+'ill_01.jpg',
       BASE+'ill_02.jpg',
@@ -363,7 +399,10 @@ const categories = {
     title: '塗鴉',
     price: 'NTD. 400',
     desc: '隨性筆觸，依照設定給我的心理感受繪製。\n無法更改任何項目。\n作畫時間約 1～2 週。',
-    tags: ['單人', '滿板'],
+    tags: [
+      { text: '單人', h: true },
+      { text: '滿板', h: false },
+    ],
     images: [
       BASE+'doo_01.jpg',
       BASE+'doo_02.jpg',
@@ -375,7 +414,11 @@ const categories = {
     title: '小品插畫',
     price: 'NTD. 600～800',
     desc: '有構圖、有氛圍，完成度較高的輕量委託。\n可給主題或元素，其餘由畫師自由發揮。\n作畫時間約 1～2 週。',
-    tags: ['單人', '滿板', '氛圍感'],
+    tags: [
+      { text: '單人', h: true },
+      { text: '滿板', h: false },
+      { text: '氛圍感', h: false },
+    ],
     images: [
       BASE+'light_01.jpg',
       BASE+'light_02.jpg',
@@ -389,7 +432,11 @@ const categories = {
     title: '角色設計',
     price: 'NTD. 3,000～5,000',
     desc: '需提供基本設定。\n包含正面、背面、表情x3、胸像、色票。\n作畫時間約 1 個月。',
-    tags: ['角色外觀', '純文字設定', '設定包'],
+    tags: [
+      { text: '角色外觀', h: true },
+      { text: '純文字設定', h: false },
+      { text: '設定包', h: false },
+    ],
     images: [
       BASE+'charaD_01.jpg',
     ]
@@ -399,7 +446,12 @@ const categories = {
     title: '新藝術驚喜包',
     price: 'NTD. 1,000～2,000',
     desc: '需提供角色設定與故事。\n皆有背景、框飾、花卉，可選擇是否放上名字。\n作畫時間約 1 個月。',
-    tags: ['頭像', '半身', '全身', '自由發揮'],
+    tags: [
+      { text: '頭像', h: true },
+      { text: '半身', h: false },
+      { text: '全身', h: false },
+      { text: '自由發揮', h: false },
+    ],
     images: [
       BASE+'sur_01.png',
       BASE+'sur_02.png',
@@ -410,7 +462,10 @@ const categories = {
     title: '花卉驚喜包',
     price: 'NTD. 1,000',
     desc: '花卉為主題的驚喜包。\n需提供角色設定，其餘由畫師自由發揮。\n作畫時間約 1 個月。',
-    tags: ['花卉', '自由發揮'],
+    tags: [
+      { text: '花卉', h: true },
+      { text: '自由發揮', h: false },
+    ],
     images: [
       BASE+'surf_01.png',
       BASE+'surf_02.png',
@@ -423,7 +478,11 @@ const categories = {
     title: '點陣驚喜包',
     price: 'NTD. 450',
     desc: '名牌、塔羅、紋樣。\n請參考各版型。\n作畫時間約 2 週。',
-    tags: ['名牌', '塔羅', '紋樣'],
+    tags: [
+      { text: '名牌', h: true },
+      { text: '塔羅', h: false },
+      { text: '紋樣', h: false },
+    ],
     images: [
       BASE+'pixel_01.jpg',
       BASE+'pixel_02.jpg',
@@ -436,7 +495,10 @@ const categories = {
     title: 'Q版插畫',
     price: 'NTD. 600～1,200',
     desc: 'Q版風格插畫。\n作畫時間約 1～2 週。',
-    tags: ['Q版', '可愛風'],
+    tags: [
+      { text: 'Q版', h: true },
+      { text: '可愛風', h: false },
+    ],
     images: [
       BASE+'chibi_01.jpg',
       BASE+'chibi_02.jpg',
@@ -449,7 +511,9 @@ const categories = {
     title: '線稿',
     price: '依需求訂定',
     desc: '線稿委託，詳情請來信洽詢。',
-    tags: ['線稿'],
+    tags: [
+      { text: '線稿', h: true },
+    ],
     images: [
       BASE+'lineA_01.jpg',
     ]
@@ -468,6 +532,12 @@ function switchCategory(cat) {
   render();
 }
 
+function navigate(dir) {
+  const imgs = categories[currentCategory].images;
+  currentIndex = (currentIndex + dir + imgs.length) % imgs.length;
+  render();
+}
+
 function render() {
   const data = categories[currentCategory];
   const imgs = data.images;
@@ -478,11 +548,17 @@ function render() {
   document.getElementById('infoPrice').textContent = data.price;
   document.getElementById('infoDesc').textContent = data.desc;
 
+  // 箭頭顯示邏輯（只有一張圖時隱藏）
+  document.getElementById('prevBtn').classList.toggle('hidden', imgs.length <= 1);
+  document.getElementById('nextBtn').classList.toggle('hidden', imgs.length <= 1);
+
+  // tags 渲染
   const tagsEl = document.getElementById('infoTags');
-  tagsEl.innerHTML = data.tags.map((t, i) =>
-    `<span class="tag ${i === 0 ? 'highlight' : ''}">${t}</span>`
+  tagsEl.innerHTML = data.tags.map(t =>
+    `<span class="tag ${t.h ? 'highlight' : ''}">${t.text}</span>`
   ).join('');
 
+  // 縮圖渲染
   const thumbsEl = document.getElementById('thumbnails');
   thumbsEl.innerHTML = imgs.map((src, i) =>
     `<div class="thumb ${i === currentIndex ? 'active' : ''}" onclick="selectThumb(${i})">
