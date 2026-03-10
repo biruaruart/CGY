@@ -440,6 +440,9 @@
     <a class="nav-item" href="#usage">
       <span class="nav-dot"></span>作品使用規範
     </a>
+    <a class="nav-item" href="#copyright">
+      <span class="nav-dot"></span>著作權
+    </a>
   </div>
 
   <div class="nav-group">
@@ -577,7 +580,26 @@
     </div>
   </section>
 
-  <!-- ⑤ 委託步驟 -->
+  <!-- ⑤ 著作權 -->
+  <section class="section" id="copyright">
+    <div class="section-header">
+      <div class="section-icon">©</div>
+      <div>
+        <div class="section-title">著作權與所有權</div>
+      </div>
+    </div>
+
+    <div class="info-card">
+      繪師保有所有委託作品的 <strong>完整著作權</strong>。<br>
+      委託並支付款項後，委託者獲得的是 <strong>個人、非商業性質的使用授權</strong>，而非著作權本身。<br>
+      <strong>著作權在任何情況下均不會轉移給委託者。</strong>
+    </div>
+    <div class="info-card warn">
+      若有超出上述授權範圍的使用需求，請事先取得繪師的書面同意。
+    </div>
+  </section>
+
+  <!-- ⑥ 委託步驟 -->
   <section class="section" id="process">
     <div class="section-header">
       <div class="section-icon">📋</div>
@@ -658,7 +680,7 @@
     </div>
 
     <div class="info-card">
-      📬 <strong>biruaruart@gmail.com</strong>
+      📬 <strong><a href="/cdn-cgi/l/email-protection" class="__cf_email__" data-cfemail="64060d1611051611051610240309050d084a070b09">[email&#160;protected]</a></strong>
     </div>
 
     <div class="template-label">✏ 來信委託可複製用（一般委託）</div>
@@ -704,7 +726,7 @@
 
 </main>
 
-<script>
+<script data-cfasync="false" src="/cdn-cgi/scripts/5c5dd728/cloudflare-static/email-decode.min.js"></script><script>
   // 捲動時高亮對應的索引項
   const sections = document.querySelectorAll('.section');
   const navItems = document.querySelectorAll('.nav-item');
@@ -713,13 +735,4 @@
     entries.forEach(entry => {
       if (entry.isIntersecting) {
         navItems.forEach(item => {
-          item.classList.toggle('active', item.getAttribute('href') === '#' + entry.target.id);
-        });
-      }
-    });
-  }, { rootMargin: '-30% 0px -60% 0px' });
-
-  sections.forEach(s => observer.observe(s));
-</script>
-</body>
-</html>
+         
