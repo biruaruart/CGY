@@ -226,6 +226,7 @@
     color: var(--text-dim);
     line-height: 1.6;
     border-bottom: 1px solid rgba(30,51,48,0.5);
+    flex-wrap: wrap;
   }
 
   .list-item:last-child { border-bottom: none; }
@@ -543,7 +544,7 @@
       <div class="list-card can">
         <div class="list-card-title">✔ You may…</div>
         <div class="list-item"><span class="list-mark">✔</span><span>Use the artwork for <strong style="color:var(--text)">personal, non-commercial</strong> purposes.<br><em>e.g. printing badges or cards for personal use</em></span></div>
-        <div class="list-item"><span class="list-mark">✔</span>Post the artwork anywhere online, as long as you <strong style="color:var(--text)">credit the artist</strong>.</div>
+        <div class="list-item"><span class="list-mark">✔</span><span>Post the artwork anywhere online, as long as you <strong style="color:var(--text)">credit the artist</strong>.</span></div>
       </div>
 
       <div class="list-card cannot">
@@ -669,7 +670,7 @@
     </div>
 
     <div class="info-card">
-      📬 <strong>biruaruart@gmail.com</strong>
+      📬 <strong><a href="/cdn-cgi/l/email-protection" class="__cf_email__" data-cfemail="fa9893888f9b888f9b888eba9d979b9396d4999597">[email&#160;protected]</a></strong>
     </div>
 
     <div class="template-label">✏ Template — General Commission</div>
@@ -715,7 +716,7 @@ Wish: *** A wish or two *** (※ maybe it'll come true!)</div>
 
 </main>
 
-<script>
+<script data-cfasync="false" src="/cdn-cgi/scripts/5c5dd728/cloudflare-static/email-decode.min.js"></script><script>
   const sections = document.querySelectorAll('.section');
   const navItems = document.querySelectorAll('.nav-item');
 
@@ -723,13 +724,4 @@ Wish: *** A wish or two *** (※ maybe it'll come true!)</div>
     entries.forEach(entry => {
       if (entry.isIntersecting) {
         navItems.forEach(item => {
-          item.classList.toggle('active', item.getAttribute('href') === '#' + entry.target.id);
-        });
-      }
-    });
-  }, { rootMargin: '-30% 0px -60% 0px' });
-
-  sections.forEach(s => observer.observe(s));
-</script>
-</body>
-</html>
+         
