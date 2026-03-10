@@ -1,0 +1,735 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Biru — Commission Info</title>
+<style>
+  @import url('https://fonts.googleapis.com/css2?family=Cinzel:wght@400;600&family=Noto+Sans+TC:wght@300;400;500&display=swap');
+
+  :root {
+    --bg: #0a0f0e;
+    --surface: #111a18;
+    --surface2: #182420;
+    --border: #1e3330;
+    --accent: #2dd4bf;
+    --accent2: #e8633a;
+    --text: #e0f2f0;
+    --text-dim: #6b9e98;
+    --sidebar-w: 220px;
+  }
+
+  * { box-sizing: border-box; margin: 0; padding: 0; }
+
+  body {
+    background: var(--bg);
+    color: var(--text);
+    font-family: 'Noto Sans TC', sans-serif;
+    min-height: 100vh;
+    display: flex;
+  }
+
+  /* ── Sidebar ── */
+  .sidebar {
+    width: var(--sidebar-w);
+    min-height: 100vh;
+    background: var(--surface);
+    border-right: 1px solid var(--border);
+    position: fixed;
+    top: 0; left: 0;
+    display: flex;
+    flex-direction: column;
+    padding: 32px 0 24px;
+    z-index: 10;
+  }
+
+  .sidebar-logo {
+    font-family: 'Cinzel', serif;
+    font-size: 14px;
+    letter-spacing: 0.2em;
+    color: var(--accent);
+    padding: 0 24px 24px;
+    border-bottom: 1px solid var(--border);
+  }
+
+  .sidebar-logo span {
+    display: block;
+    font-size: 10px;
+    color: var(--text-dim);
+    letter-spacing: 0.15em;
+    margin-top: 4px;
+  }
+
+  .nav-group { padding: 20px 0 0; }
+
+  .nav-group-title {
+    font-size: 9px;
+    letter-spacing: 0.25em;
+    color: var(--text-dim);
+    padding: 0 24px 10px;
+    text-transform: uppercase;
+  }
+
+  .nav-item {
+    display: flex;
+    align-items: center;
+    gap: 10px;
+    padding: 9px 24px;
+    font-size: 12px;
+    color: var(--text-dim);
+    cursor: pointer;
+    text-decoration: none;
+    transition: all 0.2s;
+    border-left: 2px solid transparent;
+    letter-spacing: 0.05em;
+  }
+
+  .nav-item:hover {
+    color: var(--text);
+    background: var(--surface2);
+    border-left-color: var(--border);
+  }
+
+  .nav-item.active {
+    color: var(--accent);
+    background: rgba(45,212,191,0.06);
+    border-left-color: var(--accent);
+  }
+
+  .nav-dot {
+    width: 5px; height: 5px;
+    border-radius: 50%;
+    background: currentColor;
+    flex-shrink: 0;
+    opacity: 0.6;
+  }
+
+  /* ── Main ── */
+  .main {
+    margin-left: var(--sidebar-w);
+    flex: 1;
+    padding: 48px 56px 80px;
+    max-width: 860px;
+  }
+
+  .page-header {
+    margin-bottom: 48px;
+    padding-bottom: 24px;
+    border-bottom: 1px solid var(--border);
+  }
+
+  .page-label {
+    font-size: 10px;
+    letter-spacing: 0.3em;
+    color: var(--accent);
+    text-transform: uppercase;
+    margin-bottom: 10px;
+  }
+
+  .page-title {
+    font-family: 'Cinzel', serif;
+    font-size: 28px;
+    font-weight: 600;
+    color: var(--text);
+    line-height: 1.3;
+  }
+
+  .page-sub {
+    font-size: 12px;
+    color: var(--text-dim);
+    margin-top: 8px;
+    letter-spacing: 0.05em;
+  }
+
+  /* ── Sections ── */
+  .section {
+    margin-bottom: 60px;
+    scroll-margin-top: 40px;
+  }
+
+  .section-header {
+    display: flex;
+    align-items: center;
+    gap: 14px;
+    margin-bottom: 24px;
+    padding-bottom: 14px;
+    border-bottom: 1px solid var(--border);
+  }
+
+  .section-icon {
+    width: 32px; height: 32px;
+    border: 1px solid var(--border);
+    display: flex; align-items: center; justify-content: center;
+    font-size: 15px;
+    flex-shrink: 0;
+    background: var(--surface2);
+  }
+
+  .section-title {
+    font-family: 'Cinzel', serif;
+    font-size: 15px;
+    font-weight: 600;
+    color: var(--text);
+    letter-spacing: 0.08em;
+  }
+
+  .section-note {
+    font-size: 11px;
+    color: var(--text-dim);
+    margin-top: 3px;
+    letter-spacing: 0.05em;
+  }
+
+  /* ── Two column cards ── */
+  .two-col {
+    display: grid;
+    grid-template-columns: 1fr 1fr;
+    gap: 16px;
+  }
+
+  .list-card {
+    background: var(--surface);
+    border: 1px solid var(--border);
+    padding: 18px 20px;
+    position: relative;
+    overflow: hidden;
+  }
+
+  .list-card::before {
+    content: '';
+    position: absolute;
+    top: 0; left: 0;
+    width: 100%; height: 2px;
+  }
+
+  .list-card.can::before { background: var(--accent); }
+  .list-card.cannot::before { background: var(--accent2); }
+
+  .list-card-title {
+    font-size: 11px;
+    letter-spacing: 0.15em;
+    text-transform: uppercase;
+    margin-bottom: 14px;
+    padding-bottom: 10px;
+    border-bottom: 1px solid var(--border);
+  }
+
+  .list-card.can .list-card-title { color: var(--accent); }
+  .list-card.cannot .list-card-title { color: var(--accent2); }
+
+  .list-item {
+    display: flex;
+    align-items: flex-start;
+    gap: 10px;
+    padding: 6px 0;
+    font-size: 13px;
+    color: var(--text-dim);
+    line-height: 1.6;
+    border-bottom: 1px solid rgba(30,51,48,0.5);
+  }
+
+  .list-item:last-child { border-bottom: none; }
+
+  .list-mark {
+    font-size: 11px;
+    margin-top: 2px;
+    flex-shrink: 0;
+  }
+
+  .list-card.can .list-mark { color: var(--accent); }
+  .list-card.cannot .list-mark { color: var(--accent2); }
+
+  .list-item em {
+    font-style: normal;
+    color: var(--text-dim);
+    font-size: 11px;
+  }
+
+  /* ── Info cards ── */
+  .info-card {
+    background: var(--surface);
+    border: 1px solid var(--border);
+    border-left: 3px solid var(--accent);
+    padding: 18px 22px;
+    margin-bottom: 12px;
+    font-size: 13px;
+    color: var(--text-dim);
+    line-height: 1.8;
+  }
+
+  .info-card.warn { border-left-color: var(--accent2); }
+  .info-card strong { color: var(--text); font-weight: 500; }
+
+  /* ── Steps ── */
+  .steps {
+    display: flex;
+    flex-direction: column;
+    position: relative;
+  }
+
+  .steps::before {
+    content: '';
+    position: absolute;
+    left: 19px;
+    top: 20px;
+    bottom: 20px;
+    width: 1px;
+    background: linear-gradient(to bottom, var(--accent), transparent);
+  }
+
+  .step {
+    display: flex;
+    gap: 20px;
+    padding: 0 0 24px;
+    position: relative;
+  }
+
+  .step-num {
+    width: 40px; height: 40px;
+    border: 1px solid var(--accent);
+    background: var(--surface);
+    display: flex; align-items: center; justify-content: center;
+    font-family: 'Cinzel', serif;
+    font-size: 13px;
+    color: var(--accent);
+    flex-shrink: 0;
+    z-index: 1;
+  }
+
+  .step-num.warn {
+    border-color: var(--accent2);
+    color: var(--accent2);
+    font-size: 16px;
+  }
+
+  .step-body {
+    background: var(--surface);
+    border: 1px solid var(--border);
+    padding: 14px 18px;
+    flex: 1;
+  }
+
+  .step-title {
+    font-size: 12px;
+    letter-spacing: 0.12em;
+    color: var(--accent);
+    text-transform: uppercase;
+    margin-bottom: 8px;
+  }
+
+  .step-title.warn { color: var(--accent2); }
+
+  .step-desc {
+    font-size: 13px;
+    color: var(--text-dim);
+    line-height: 1.8;
+  }
+
+  .step-desc strong { color: var(--text); font-weight: 500; }
+
+  .step-note {
+    font-size: 11px;
+    color: var(--text-dim);
+    margin-top: 8px;
+    padding-top: 8px;
+    border-top: 1px solid var(--border);
+    opacity: 0.8;
+  }
+
+  /* ── Template box ── */
+  .template-label {
+    font-size: 10px;
+    letter-spacing: 0.2em;
+    color: var(--accent);
+    text-transform: uppercase;
+    margin-bottom: 8px;
+  }
+
+  .template-box {
+    background: #0d1a17;
+    border: 1px solid var(--border);
+    border-left: 3px solid var(--accent);
+    padding: 18px 22px;
+    font-size: 12px;
+    color: var(--text-dim);
+    line-height: 2;
+    white-space: pre-line;
+    margin-top: 4px;
+    margin-bottom: 20px;
+  }
+
+  /* ── Copyright block ── */
+  .copyright-block {
+    background: var(--surface);
+    border: 1px solid var(--border);
+    border-top: 2px solid var(--accent);
+    padding: 22px 24px;
+    margin-bottom: 12px;
+  }
+
+  .copyright-block .cr-title {
+    font-family: 'Cinzel', serif;
+    font-size: 12px;
+    letter-spacing: 0.15em;
+    color: var(--accent);
+    text-transform: uppercase;
+    margin-bottom: 12px;
+  }
+
+  .copyright-block p {
+    font-size: 13px;
+    color: var(--text-dim);
+    line-height: 1.9;
+  }
+
+  .copyright-block strong { color: var(--text); font-weight: 500; }
+
+  /* ── Footer ── */
+  .footer-note {
+    margin-top: 48px;
+    padding: 20px 24px;
+    border: 1px solid var(--border);
+    border-top: 2px solid var(--accent2);
+    background: var(--surface);
+    font-size: 13px;
+    color: var(--text-dim);
+    line-height: 1.8;
+    text-align: center;
+  }
+
+  .footer-note strong { color: var(--accent2); }
+
+  @media (max-width: 768px) {
+    .sidebar { transform: translateX(-100%); }
+    .main { margin-left: 0; padding: 24px 20px 60px; }
+    .two-col { grid-template-columns: 1fr; }
+  }
+</style>
+</head>
+<body>
+
+<!-- Sidebar -->
+<nav class="sidebar">
+  <div class="sidebar-logo">
+    BIRU
+    <span>COMMISSION INFO</span>
+  </div>
+
+  <div class="nav-group">
+    <div class="nav-group-title">Terms of Service</div>
+    <a class="nav-item active" href="#will-draw">
+      <span class="nav-dot"></span>Will / Won't Draw
+    </a>
+    <a class="nav-item" href="#payment">
+      <span class="nav-dot"></span>Payment &amp; Refund
+    </a>
+    <a class="nav-item" href="#cancel">
+      <span class="nav-dot"></span>Cancellation
+    </a>
+    <a class="nav-item" href="#usage">
+      <span class="nav-dot"></span>Artwork Usage
+    </a>
+    <a class="nav-item" href="#copyright">
+      <span class="nav-dot"></span>Copyright
+    </a>
+  </div>
+
+  <div class="nav-group">
+    <div class="nav-group-title">Commission Process</div>
+    <a class="nav-item" href="#process">
+      <span class="nav-dot"></span>Steps
+    </a>
+    <a class="nav-item" href="#how-to">
+      <span class="nav-dot"></span>How to Commission
+    </a>
+    <a class="nav-item" href="#surprise">
+      <span class="nav-dot"></span>Surprise Box
+    </a>
+  </div>
+</nav>
+
+<!-- Main -->
+<main class="main">
+
+  <div class="page-header">
+    <div class="page-label">Biru / ビル</div>
+    <div class="page-title">Commission Info</div>
+    <div class="page-sub">Terms of Service · Commission Process · Artwork Usage</div>
+  </div>
+
+  <!-- ① Will / Won't Draw -->
+  <section class="section" id="will-draw">
+    <div class="section-header">
+      <div class="section-icon">✏️</div>
+      <div>
+        <div class="section-title">Will / Won't Draw</div>
+        <div class="section-note">This list will be updated as more options become available.</div>
+      </div>
+    </div>
+
+    <div class="two-col">
+      <div class="list-card can">
+        <div class="list-card-title">✔ I will draw…</div>
+        <div class="list-item"><span class="list-mark">✔</span>Original characters</div>
+        <div class="list-item"><span class="list-mark">✔</span>Fan art</div>
+        <div class="list-item"><span class="list-mark">✔</span>Suggestive content</div>
+        <div class="list-item"><span class="list-mark">✔</span>Humans</div>
+        <div class="list-item"><span class="list-mark">✔</span>Furry / Non-human / Hybrid</div>
+      </div>
+
+      <div class="list-card cannot">
+        <div class="list-card-title">✖ I won't draw…</div>
+        <div class="list-item"><span class="list-mark">✖</span>NSFW (R18 &amp; R18G)</div>
+        <div class="list-item"><span class="list-mark">✖</span>Real people</div>
+        <div class="list-item"><span class="list-mark">✖</span>Text-only refs <em>※ except for character design commissions</em></div>
+        <div class="list-item"><span class="list-mark">✖</span>Unauthorized use of others' characters <em>※ without the owner's consent</em></div>
+        <div class="list-item"><span class="list-mark">✖</span>Extreme gore or horror</div>
+        <div class="list-item"><span class="list-mark">✖</span>Mecha / Heavy machinery</div>
+      </div>
+    </div>
+
+    <div class="info-card" style="margin-top:14px;">
+      Not sure if your idea is okay? Feel free to reach out and ask before commissioning!
+    </div>
+  </section>
+
+  <!-- ② Payment & Refund -->
+  <section class="section" id="payment">
+    <div class="section-header">
+      <div class="section-icon">💰</div>
+      <div>
+        <div class="section-title">Payment &amp; Refund</div>
+        <div class="section-note">International clients: PayPal only · USD pricing applies</div>
+      </div>
+    </div>
+
+    <div class="info-card">
+      Full payment must be made <strong>upfront in one payment</strong> before work begins.
+    </div>
+    <div class="info-card warn">
+      If a cancellation is requested after payment, only <strong>30%</strong> of the total will be refunded.
+    </div>
+  </section>
+
+  <!-- ③ Cancellation -->
+  <section class="section" id="cancel">
+    <div class="section-header">
+      <div class="section-icon">🚫</div>
+      <div>
+        <div class="section-title">Cancellation</div>
+        <div class="section-note">When will a commission be cancelled?</div>
+      </div>
+    </div>
+
+    <div class="info-card warn">
+      If there is no response within <strong>7 days</strong> after the <strong>first confirmation email</strong> is sent, the commission will be considered cancelled.
+    </div>
+    <div class="info-card warn">
+      If the requested content is beyond the artist's current abilities, the commission will be declined and the client will be notified.
+    </div>
+  </section>
+
+  <!-- ④ Artwork Usage -->
+  <section class="section" id="usage">
+    <div class="section-header">
+      <div class="section-icon">⚠️</div>
+      <div>
+        <div class="section-title">Artwork Usage</div>
+        <div class="section-note">If anything is unclear or not listed here, please feel free to ask!</div>
+      </div>
+    </div>
+
+    <div class="two-col">
+      <div class="list-card can">
+        <div class="list-card-title">✔ You may…</div>
+        <div class="list-item"><span class="list-mark">✔</span><span>Use the artwork for <strong style="color:var(--text)">personal, non-commercial</strong> purposes.<br><em>e.g. printing badges or cards for personal use</em></span></div>
+        <div class="list-item"><span class="list-mark">✔</span>Post the artwork anywhere online, as long as you <strong style="color:var(--text)">credit the artist</strong>.</div>
+      </div>
+
+      <div class="list-card cannot">
+        <div class="list-card-title">✖ You may not…</div>
+        <div class="list-item"><span class="list-mark">✖</span>Remove my signature or watermark.</div>
+        <div class="list-item"><span class="list-mark">✖</span>Claim the artwork as your own.</div>
+        <div class="list-item"><span class="list-mark">✖</span>Re-edit, crop, alter, liquify, or trace the artwork.</div>
+        <div class="list-item"><span class="list-mark">✖</span>Use the artwork for any commercial purpose.</div>
+      </div>
+    </div>
+
+    <div class="info-card" style="margin-top:14px;">
+      Completed commissions may be posted to my social media, portfolio, or other promotional channels (<strong>the commissioner will always be credited!</strong>).<br>
+      If you prefer your commission to remain private, please let me know in advance.<br>
+      <em style="font-size:11px;">Artwork posted publicly will have a grid watermark applied.</em>
+    </div>
+    <div class="info-card">
+      You will receive two files: a <strong>watermarked version</strong>, and a <strong>full-resolution clean version</strong> (with small signature only) for personal use.
+    </div>
+    <div class="info-card warn">
+      The artist reserves the right to decline any commission request, for any reason.
+    </div>
+  </section>
+
+  <!-- ⑤ Copyright -->
+  <section class="section" id="copyright">
+    <div class="section-header">
+      <div class="section-icon">©</div>
+      <div>
+        <div class="section-title">Copyright &amp; Ownership</div>
+      </div>
+    </div>
+
+    <div class="copyright-block">
+      <div class="cr-title">Copyright Notice</div>
+      <p>
+        The artist retains <strong>full copyright</strong> of all commissioned works.<br>
+        Purchasing a commission grants you a <strong>personal, non-commercial license</strong> to use the artwork.<br>
+        <strong>Ownership of the artwork does not transfer to the commissioner</strong> under any circumstances.<br><br>
+        Any usage beyond the scope of the license granted above requires prior written consent from the artist.
+      </p>
+    </div>
+  </section>
+
+  <!-- ⑥ Steps -->
+  <section class="section" id="process">
+    <div class="section-header">
+      <div class="section-icon">📋</div>
+      <div>
+        <div class="section-title">Commission Steps</div>
+      </div>
+    </div>
+
+    <div class="steps">
+      <div class="step">
+        <div class="step-num">01</div>
+        <div class="step-body">
+          <div class="step-title">Send your commission request</div>
+          <div class="step-desc">Once reviewed, the artist will reply via DM or email to confirm receipt and discuss the details and final pricing.</div>
+        </div>
+      </div>
+
+      <div class="step">
+        <div class="step-num">02</div>
+        <div class="step-body">
+          <div class="step-title">Payment</div>
+          <div class="step-desc">Full payment must be completed upfront. Work will only begin <strong>after full payment is received</strong>.<br><strong>First paid, first served!</strong></div>
+        </div>
+      </div>
+
+      <div class="step">
+        <div class="step-num">03</div>
+        <div class="step-body">
+          <div class="step-title">Sketch preview</div>
+          <div class="step-desc">A rough sketch will be sent via DM or email for your review.<br>You may request <strong>up to 2 free revisions</strong> at this stage. No major changes will be accepted after this point — please confirm everything you want during the sketch phase.</div>
+          <div class="step-note">※ Surprise Box commissions cannot be revised unless there is an artist error (e.g. wrong eye color, wrong outfit details).</div>
+        </div>
+      </div>
+
+      <div class="step">
+        <div class="step-num">04</div>
+        <div class="step-body">
+          <div class="step-title">Final preview</div>
+          <div class="step-desc">A finished preview will be sent for your final review.<br>One <strong>last minor revision</strong> is allowed at this stage — limited to small adjustments only (e.g. coloring errors).</div>
+        </div>
+      </div>
+
+      <div class="step">
+        <div class="step-num">05</div>
+        <div class="step-body">
+          <div class="step-title">Commission complete!</div>
+          <div class="step-desc">The final files will be delivered to you via email.</div>
+          <div class="step-note">You will receive: full-resolution PNG and watermarked PNG.</div>
+        </div>
+      </div>
+
+      <div class="step">
+        <div class="step-num warn">⚠</div>
+        <div class="step-body">
+          <div class="step-title warn">Important</div>
+          <div class="step-desc">Once the commission is completed and you have confirmed receipt (in any form), the transaction is considered final. No further revisions will be accepted, and the artwork may not be modified by the commissioner.</div>
+        </div>
+      </div>
+
+      <div class="step">
+        <div class="step-num warn">⚠</div>
+        <div class="step-body">
+          <div class="step-title warn">Regarding colors</div>
+          <div class="step-desc">The artist uses a rich, expressive color palette and generally does not replicate a character's original colors exactly. Please review the provided examples carefully before commissioning.</div>
+        </div>
+      </div>
+    </div>
+  </section>
+
+  <!-- ⑦ How to Commission -->
+  <section class="section" id="how-to">
+    <div class="section-header">
+      <div class="section-icon">📬</div>
+      <div>
+        <div class="section-title">How to Commission</div>
+        <div class="section-note">Please read the Terms of Service and Commission Process first, then send me an email!</div>
+      </div>
+    </div>
+
+    <div class="info-card">
+      📬 <strong>biruaruart@gmail.com</strong>
+    </div>
+
+    <div class="template-label">✏ Template — General Commission</div>
+    <div class="template-box">*** A friendly greeting ***
+
+Commission type: Doodle — Headshot
+Purpose: Personal use as a profile picture
+Request: *** What you'd like in the artwork ***
+Character reference & description: *** Describe your character and attach any reference images ***
+Anything else: Feel free to add notes, or leave this blank</div>
+  </section>
+
+  <!-- ⑧ Surprise Box -->
+  <section class="section" id="surprise">
+    <div class="section-header">
+      <div class="section-icon">✨</div>
+      <div>
+        <div class="section-title">What is a Surprise Box?</div>
+        <div class="section-note">Dreams and gambling ✨</div>
+      </div>
+    </div>
+
+    <div class="info-card">
+      Pick any Surprise Box type, provide your character's appearance and backstory, make a wish or two… <em>(maybe it'll come true…!)</em><br>
+      Then just sit back and wait for your artwork to arrive!
+    </div>
+
+    <div class="template-label" style="margin-top:20px;">✏ Template — Surprise Box Commission</div>
+    <div class="template-box">*** A friendly greeting ***
+
+Commission type: Surprise Box — Chibi 2.5-head
+Character reference & description: *** Describe your character and attach any reference images ***
+Anything else: Feel free to add notes, or leave this blank
+Add-on: I'd love a Pokémon in there!
+Wish: *** A wish or two *** (※ maybe it'll come true!)</div>
+  </section>
+
+  <!-- Footer -->
+  <div class="footer-note">
+    <strong>By commissioning, you confirm that you have read and agreed to all of the above terms.</strong><br>
+    The artist reserves the right to refuse any commission that does not comply with these rules.
+  </div>
+
+</main>
+
+<script>
+  const sections = document.querySelectorAll('.section');
+  const navItems = document.querySelectorAll('.nav-item');
+
+  const observer = new IntersectionObserver((entries) => {
+    entries.forEach(entry => {
+      if (entry.isIntersecting) {
+        navItems.forEach(item => {
+          item.classList.toggle('active', item.getAttribute('href') === '#' + entry.target.id);
+        });
+      }
+    });
+  }, { rootMargin: '-30% 0px -60% 0px' });
+
+  sections.forEach(s => observer.observe(s));
+</script>
+</body>
+</html>
