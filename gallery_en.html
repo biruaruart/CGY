@@ -1,0 +1,540 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Biru Commission Gallery</title>
+<style>
+  @import url('https://fonts.googleapis.com/css2?family=Cinzel:wght@400;600&family=Noto+Sans+TC:wght@300;400;500&display=swap');
+
+  :root {
+    --bg: #0a0f0e;
+    --surface: #111a18;
+    --surface2: #182420;
+    --border: #1e3330;
+    --accent: #2dd4bf;
+    --accent2: #e8633a;
+    --accent3: #5eead4;
+    --text: #e0f2f0;
+    --text-dim: #6b9e98;
+  }
+
+  * { box-sizing: border-box; margin: 0; padding: 0; }
+
+  body {
+    background: var(--bg);
+    color: var(--text);
+    font-family: 'Noto Sans TC', sans-serif;
+    min-height: 100vh;
+    padding: 24px 20px;
+  }
+
+  .tabs {
+    display: flex;
+    gap: 6px;
+    margin-bottom: 20px;
+    flex-wrap: wrap;
+  }
+
+  .tab-btn {
+    background: var(--surface);
+    border: 1px solid var(--border);
+    color: var(--text-dim);
+    padding: 6px 16px;
+    font-size: 12px;
+    font-family: 'Noto Sans TC', sans-serif;
+    letter-spacing: 0.08em;
+    cursor: pointer;
+    transition: all 0.2s;
+    clip-path: polygon(8px 0%, 100% 0%, calc(100% - 8px) 100%, 0% 100%);
+  }
+
+  .tab-btn:hover {
+    border-color: var(--accent);
+    color: var(--accent);
+  }
+
+  .tab-btn.active {
+    background: linear-gradient(135deg, #0d3d36, #1a2e20);
+    border-color: var(--accent);
+    color: var(--accent);
+  }
+
+  .viewer {
+    display: grid;
+    grid-template-columns: 1fr 280px;
+    grid-template-rows: auto auto;
+    gap: 12px;
+  }
+
+  .main-image-wrap {
+    grid-column: 1;
+    grid-row: 1;
+    position: relative;
+    background: var(--surface);
+    border: 1px solid var(--border);
+    aspect-ratio: 1 / 1;
+    overflow: hidden;
+    cursor: zoom-in;
+  }
+
+  .main-image-wrap::before {
+    content: '';
+    position: absolute;
+    inset: 0;
+    background: linear-gradient(135deg, transparent 60%, rgba(45,212,191,0.06));
+    z-index: 1;
+    pointer-events: none;
+  }
+
+  .corner {
+    position: absolute;
+    width: 14px; height: 14px;
+    border-color: var(--accent);
+    border-style: solid;
+    z-index: 2;
+    opacity: 0.6;
+  }
+  .corner.tl { top: 8px; left: 8px; border-width: 1px 0 0 1px; }
+  .corner.tr { top: 8px; right: 8px; border-width: 1px 1px 0 0; }
+  .corner.bl { bottom: 8px; left: 8px; border-width: 0 0 1px 1px; }
+  .corner.br { bottom: 8px; right: 8px; border-width: 0 1px 1px 0; }
+
+  .main-image-wrap img {
+    width: 100%; height: 100%;
+    object-fit: cover;
+    display: block;
+    transition: transform 0.4s ease;
+  }
+
+  .main-image-wrap:hover img { transform: scale(1.03); }
+
+  .zoom-hint {
+    position: absolute;
+    bottom: 10px; right: 10px;
+    background: rgba(0,0,0,0.6);
+    border: 1px solid var(--border);
+    color: var(--text-dim);
+    font-size: 10px;
+    padding: 3px 8px;
+    letter-spacing: 0.1em;
+    z-index: 2;
+  }
+
+  /* ── Nav arrows ── */
+  .nav-btn {
+    position: absolute;
+    top: 50%;
+    transform: translateY(-50%);
+    background: rgba(0,0,0,0.45);
+    border: 1px solid var(--border);
+    color: var(--text-dim);
+    width: 28px; height: 48px;
+    display: flex; align-items: center; justify-content: center;
+    cursor: pointer;
+    z-index: 3;
+    transition: all 0.2s;
+    font-size: 14px;
+    user-select: none;
+  }
+  .nav-btn:hover {
+    background: rgba(45,212,191,0.15);
+    border-color: var(--accent);
+    color: var(--accent);
+  }
+  .nav-btn.prev { left: 0; }
+  .nav-btn.next { right: 0; }
+  .nav-btn.hidden { opacity: 0; pointer-events: none; }
+
+  .info-panel {
+    grid-column: 2;
+    grid-row: 1;
+    background: var(--surface);
+    border: 1px solid var(--border);
+    padding: 20px;
+    display: flex;
+    flex-direction: column;
+    gap: 14px;
+    position: relative;
+    overflow: hidden;
+  }
+
+  .info-panel::after {
+    content: '';
+    position: absolute;
+    top: 0; left: 0;
+    width: 2px; height: 100%;
+    background: linear-gradient(to bottom, var(--accent), transparent);
+  }
+
+  .info-category {
+    font-size: 10px;
+    letter-spacing: 0.2em;
+    color: var(--accent);
+    text-transform: uppercase;
+  }
+
+  .info-title {
+    font-family: 'Cinzel', serif;
+    font-size: 16px;
+    font-weight: 600;
+    color: var(--text);
+    line-height: 1.4;
+    border-bottom: 1px solid var(--border);
+    padding-bottom: 12px;
+  }
+
+  .info-price {
+    display: flex;
+    flex-direction: column;
+    gap: 6px;
+  }
+
+  .price-label {
+    font-size: 10px;
+    color: var(--text-dim);
+    letter-spacing: 0.15em;
+  }
+
+  .price-value {
+    font-size: 18px;
+    color: var(--accent2);
+    font-weight: 500;
+  }
+
+  .info-tags {
+    display: flex;
+    flex-wrap: wrap;
+    gap: 6px;
+    margin-top: auto;
+  }
+
+  .tag {
+    font-size: 10px;
+    padding: 3px 10px;
+    border: 1px solid var(--border);
+    color: var(--text-dim);
+    letter-spacing: 0.08em;
+  }
+
+  .tag.highlight {
+    border-color: var(--accent);
+    color: var(--accent);
+  }
+
+  .info-desc {
+    font-size: 12px;
+    color: var(--text-dim);
+    line-height: 1.7;
+    border-top: 1px solid var(--border);
+    padding-top: 12px;
+    white-space: pre-line;
+  }
+
+  .thumbnails {
+    grid-column: 1;
+    grid-row: 2;
+    display: flex;
+    gap: 8px;
+    flex-wrap: wrap;
+  }
+
+  .thumb {
+    width: 72px; height: 72px;
+    border: 1px solid var(--border);
+    overflow: hidden;
+    cursor: pointer;
+    position: relative;
+    flex-shrink: 0;
+    transition: border-color 0.2s;
+  }
+
+  .thumb img {
+    width: 100%; height: 100%;
+    object-fit: cover;
+    display: block;
+    transition: transform 0.3s;
+    filter: brightness(0.75);
+  }
+
+  .thumb:hover img { transform: scale(1.08); filter: brightness(1); }
+
+  .thumb.active { border-color: var(--accent); }
+  .thumb.active img { filter: brightness(1); }
+
+  .thumb.active::after {
+    content: '';
+    position: absolute;
+    inset: 0;
+    border: 2px solid var(--accent);
+    pointer-events: none;
+  }
+
+  /* ── Lightbox ── */
+  .lightbox {
+    display: none;
+    position: fixed;
+    inset: 0;
+    background: rgba(0,0,0,0.92);
+    z-index: 100;
+    align-items: center;
+    justify-content: center;
+    cursor: zoom-out;
+  }
+
+  .lightbox.open { display: flex; }
+
+  .lightbox img {
+    max-width: 90vw;
+    max-height: 90vh;
+    object-fit: contain;
+    border: 1px solid var(--border);
+  }
+
+  .lightbox-close {
+    position: fixed;
+    top: 20px; right: 24px;
+    font-size: 24px;
+    color: var(--text-dim);
+    cursor: pointer;
+    z-index: 101;
+    transition: color 0.2s;
+  }
+
+  .lightbox-close:hover { color: var(--accent); }
+
+  @media (max-width: 640px) {
+    .viewer { grid-template-columns: 1fr; }
+    .info-panel { grid-column: 1; grid-row: 2; }
+    .thumbnails { grid-row: 3; }
+  }
+</style>
+</head>
+<body>
+
+<!-- Category Tabs -->
+<div class="tabs">
+  <button class="tab-btn active" onclick="switchCategory('illustration')">Illustration</button>
+  <button class="tab-btn" onclick="switchCategory('doodle')">Doodle</button>
+  <button class="tab-btn" onclick="switchCategory('light')">Light Illust</button>
+  <button class="tab-btn" onclick="switchCategory('charaD')">Chara Design</button>
+  <button class="tab-btn" onclick="switchCategory('sur')">Art Nouveau Box</button>
+  <button class="tab-btn" onclick="switchCategory('surf')">Floral Box</button>
+  <button class="tab-btn" onclick="switchCategory('pixel')">Pixel Art Box</button>
+  <button class="tab-btn" onclick="switchCategory('chibi')">Chibi</button>
+  <button class="tab-btn" onclick="switchCategory('lineA')">Line Art</button>
+</div>
+
+<!-- Main Viewer -->
+<div class="viewer">
+  <div class="main-image-wrap">
+    <div class="corner tl"></div>
+    <div class="corner tr"></div>
+    <div class="corner bl"></div>
+    <div class="corner br"></div>
+    <div class="nav-btn prev" id="prevBtn" onclick="navigate(-1)">‹</div>
+    <img id="mainImg" src="" alt="Main Image" onclick="openLightbox()" style="cursor:zoom-in;">
+    <div class="nav-btn next" id="nextBtn" onclick="navigate(1)">›</div>
+    <div class="zoom-hint">CLICK TO ZOOM</div>
+  </div>
+
+  <div class="info-panel">
+    <div class="info-category" id="infoCategory">ILLUSTRATION</div>
+    <div class="info-title" id="infoTitle"></div>
+    <div class="info-price">
+      <div class="price-label">PRICE FROM</div>
+      <div class="price-value" id="infoPrice"></div>
+    </div>
+    <div class="info-desc" id="infoDesc"></div>
+    <div class="info-tags" id="infoTags"></div>
+  </div>
+
+  <div class="thumbnails" id="thumbnails"></div>
+</div>
+
+<!-- Lightbox -->
+<div class="lightbox" id="lightbox" onclick="closeLightbox()">
+  <div class="lightbox-close" onclick="closeLightbox()">✕</div>
+  <img id="lightboxImg" src="" alt="Full Image">
+</div>
+
+<script>
+const BASE = 'https://biruaruart.github.io/CGY/';
+
+// ★ Format guide:
+//   Each image can have its own tags
+//   { src: 'image path', tags: [{ text: 'label', h: true/false }] }
+//   h: true  → highlighted (teal)
+//   h: false → dim
+
+const categories = {
+  illustration: {
+    label: 'ILLUSTRATION',
+    title: 'Fantasia Impressionism',
+    price: 'NTD. 1,000~ ↑',
+    desc: 'Painterly style with rich, slightly muted colors.\n◆ Estimated time: approx. 3 weeks ~ 1 month.',
+    images: [
+      { src: BASE+'ill_01.jpg', tags: [{ text: 'Bust', h: true }, { text: 'Commission', h: false }] },
+      { src: BASE+'ill_02.jpg', tags: [{ text: 'Half-body', h: true }, { text: 'Commission', h: false }] },
+      { src: BASE+'ill_03.png', tags: [{ text: 'Half-body', h: true }, { text: 'Plurk Gacha', h: false }] },
+      { src: BASE+'ill_04.jpg', tags: [{ text: 'Bust', h: true }, { text: 'FF14', h: false }] },
+      { src: BASE+'ill_05.jpg', tags: [{ text: 'Headshot', h: true }, { text: 'FF14', h: false }] },
+      { src: BASE+'ill_06.jpg', tags: [{ text: 'Half-body', h: true }] },
+    ]
+  },
+  doodle: {
+    label: 'DOODLE',
+    title: 'Doodle',
+    price: 'NTD. 500~ ↑',
+    desc: 'Bold brushwork with a loose, expressive feel.\nDrawn based on the artist\'s impression of your character.\n◆ Estimated time: approx. 1~2 weeks.',
+    images: [
+      { src: BASE+'doo_01.jpg', tags: [{ text: 'Headshot', h: true }, { text: 'Bust', h: false }] },
+      { src: BASE+'doo_02.jpg', tags: [{ text: 'Headshot', h: true }, { text: 'Bust', h: false }] },
+      { src: BASE+'doo_03.jpg', tags: [{ text: 'Headshot', h: true }, { text: 'Bust', h: false }] },
+    ]
+  },
+  light: {
+    label: 'LIGHT ILLUST',
+    title: 'Light Illustration',
+    price: 'NTD. 700~ ↑',
+    desc: 'Atmospheric painterly style with composition.\nHigher finish than doodles, lighter than full illustration.\nYou may suggest a theme or elements; the rest is up to the artist.\n◆ Estimated time: approx. 2~3 weeks.',
+    images: [
+      { src: BASE+'light_01.jpg', tags: [{ text: 'Chest-up', h: true }, { text: 'Atmosphere', h: false }] },
+      { src: BASE+'light_02.jpg', tags: [{ text: 'Half-body', h: true }, { text: 'Atmosphere', h: false }] },
+      { src: BASE+'light_03.jpg', tags: [{ text: 'Headshot', h: true }, { text: 'Atmosphere', h: false }] },
+      { src: BASE+'light_04.jpg', tags: [{ text: 'Half-body', h: true }, { text: 'Atmosphere', h: false }] },
+      { src: BASE+'light_05.jpg', tags: [{ text: 'Chest-up', h: true }, { text: 'Atmosphere', h: false }] },
+    ]
+  },
+  charaD: {
+    label: 'CHARACTER DESIGN',
+    title: 'Character Design',
+    price: 'NTD. 3,000~ ↑',
+    desc: '※ Basic character info required.\n※ Includes: front, back, expressions x3, bust, color palette.\nOne optional add-on: small illustration or accessories.\n◆ Estimated time: approx. 1 month.',
+    images: [
+      { src: BASE+'charaD_01.jpg', tags: [{ text: 'Design Sheet', h: false }, { text: 'Settings Pkg', h: false }] },
+    ]
+  },
+  sur: {
+    label: 'ART NOUVEAU BOX',
+    title: 'Art Nouveau Surprise Box',
+    price: 'NTD. 1,500~ ↑',
+    desc: '※ Character info and backstory required.\n※ Half-body and full-body only.\nIncludes background, decorative frame, and floral elements.\n◆ Estimated time: approx. 1 month.',
+    images: [
+      { src: BASE+'sur_01.png', tags: [{ text: 'Full-body', h: true }, { text: 'Art Nouveau', h: false }] },
+      { src: BASE+'sur_02.png', tags: [{ text: 'Half-body', h: true }, { text: 'Art Nouveau', h: false }] },
+    ]
+  },
+  surf: {
+    label: 'FLORAL BOX',
+    title: 'Floral Surprise Box',
+    price: 'NTD. 1,000~ ↑',
+    desc: '※ Character info required. Choose a flower and season.\nThe rest is left to the artist\'s interpretation.\n◆ Estimated time: approx. 1 month.',
+    images: [
+      { src: BASE+'surF_01.png', tags: [{ text: 'Floral', h: true }, { text: 'Seasonal', h: false }] },
+      { src: BASE+'surF_02.png', tags: [{ text: 'Floral', h: true }, { text: 'Seasonal', h: false }] },
+      { src: BASE+'surF_03.png', tags: [{ text: 'Floral', h: true }, { text: 'Seasonal', h: false }] },
+      { src: BASE+'surF_04.png', tags: [{ text: 'Floral', h: true }, { text: 'Seasonal', h: false }] },
+    ]
+  },
+  pixel: {
+    label: 'PIXEL ART',
+    title: 'Pixel Art Surprise Box',
+    price: 'NTD. 450',
+    desc: '※ Accessories and outfits will be heavily simplified.\nPlease refer to each type for style reference.\nSpecial requests welcome at time of commission.\n◆ Estimated time: approx. 2 weeks.',
+    images: [
+      { src: BASE+'pixel_01.jpg', tags: [{ text: 'Name Card', h: true }, { text: 'FF14', h: false }] },
+      { src: BASE+'pixel_02.jpg', tags: [{ text: 'Pattern', h: true }, { text: 'FF14', h: false }] },
+      { src: BASE+'pixel_03.jpg', tags: [{ text: 'Card', h: true }, { text: 'FF14', h: false }] },
+      { src: BASE+'pixel_04.jpg', tags: [{ text: 'Card', h: true }, { text: 'FF14', h: false }] },
+    ]
+  },
+  chibi: {
+    label: 'CHIBI',
+    title: 'Chibi Illustration',
+    price: 'NTD. 600~ ↑',
+    desc: 'Chibi-style illustration.\n◆ Estimated time: approx. 1~2 weeks.',
+    images: [
+      { src: BASE+'chibi_01.jpg', tags: [{ text: 'Chibi', h: true }, { text: '2 chars', h: false }, { text: 'FF14', h: false }] },
+      { src: BASE+'chibi_02.jpg', tags: [{ text: 'Chibi', h: true }, { text: '1 char', h: false }, { text: 'FF14', h: false }] },
+      { src: BASE+'chibi_03.jpg', tags: [{ text: 'Chibi', h: true }, { text: '1 char', h: false }, { text: 'SnK', h: false }] },
+      { src: BASE+'chibi_04.jpg', tags: [{ text: 'Chibi', h: true }, { text: '2 chars', h: false }, { text: 'Pokémon', h: false }] },
+      { src: BASE+'chibi_05.jpg', tags: [{ text: 'Chibi', h: true }, { text: '2 chars', h: false }] },
+      { src: BASE+'chibi_06.jpg', tags: [{ text: 'Chibi', h: true }, { text: '2 chars', h: false }] },
+    ]
+  },
+  lineA: {
+    label: 'LINE ART',
+    title: 'Line Art / Monochrome',
+    price: 'NTD. 300~ ↑',
+    desc: 'Clean line art & monochrome commissions.\nPlease contact me for detailed requirements.\n◆ Estimated time: approx. 1~2 weeks.',
+    images: [
+      { src: BASE+'lineA_01.jpg', tags: [{ text: 'Bust', h: true }, { text: 'Expression', h: false }, { text: 'FF14', h: false }] },
+    ]
+  },
+};
+
+let currentCategory = 'illustration';
+let currentIndex = 0;
+
+function switchCategory(cat) {
+  currentCategory = cat;
+  currentIndex = 0;
+  document.querySelectorAll('.tab-btn').forEach((btn, i) => {
+    btn.classList.toggle('active', Object.keys(categories)[i] === cat);
+  });
+  render();
+}
+
+function navigate(dir) {
+  const imgs = categories[currentCategory].images;
+  currentIndex = (currentIndex + dir + imgs.length) % imgs.length;
+  render();
+}
+
+function render() {
+  const data = categories[currentCategory];
+  const imgs = data.images;
+  const current = imgs[currentIndex];
+
+  document.getElementById('mainImg').src = current.src;
+  document.getElementById('infoCategory').textContent = data.label;
+  document.getElementById('infoTitle').textContent = data.title;
+  document.getElementById('infoPrice').textContent = data.price;
+  document.getElementById('infoDesc').textContent = data.desc;
+
+  document.getElementById('prevBtn').classList.toggle('hidden', imgs.length <= 1);
+  document.getElementById('nextBtn').classList.toggle('hidden', imgs.length <= 1);
+
+  const tagsEl = document.getElementById('infoTags');
+  tagsEl.innerHTML = current.tags.map(t =>
+    `<span class="tag ${t.h ? 'highlight' : ''}">${t.text}</span>`
+  ).join('');
+
+  const thumbsEl = document.getElementById('thumbnails');
+  thumbsEl.innerHTML = imgs.map((img, i) =>
+    `<div class="thumb ${i === currentIndex ? 'active' : ''}" onclick="selectThumb(${i})">
+      <img src="${img.src}" alt="Thumbnail ${i+1}">
+    </div>`
+  ).join('');
+}
+
+function selectThumb(i) {
+  currentIndex = i;
+  render();
+}
+
+function openLightbox() {
+  const src = categories[currentCategory].images[currentIndex].src;
+  document.getElementById('lightboxImg').src = src;
+  document.getElementById('lightbox').classList.add('open');
+}
+
+function closeLightbox() {
+  document.getElementById('lightbox').classList.remove('open');
+}
+
+render();
+</script>
+</body>
+</html>
