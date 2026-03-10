@@ -1,0 +1,725 @@
+<!DOCTYPE html>
+<html lang="zh-TW">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Biru — 委託規範</title>
+<style>
+  @import url('https://fonts.googleapis.com/css2?family=Cinzel:wght@400;600&family=Noto+Sans+TC:wght@300;400;500&display=swap');
+
+  :root {
+    --bg: #0a0f0e;
+    --surface: #111a18;
+    --surface2: #182420;
+    --border: #1e3330;
+    --accent: #2dd4bf;
+    --accent2: #e8633a;
+    --text: #e0f2f0;
+    --text-dim: #6b9e98;
+    --sidebar-w: 220px;
+  }
+
+  * { box-sizing: border-box; margin: 0; padding: 0; }
+
+  body {
+    background: var(--bg);
+    color: var(--text);
+    font-family: 'Noto Sans TC', sans-serif;
+    min-height: 100vh;
+    display: flex;
+  }
+
+  /* ── 左側索引 ── */
+  .sidebar {
+    width: var(--sidebar-w);
+    min-height: 100vh;
+    background: var(--surface);
+    border-right: 1px solid var(--border);
+    position: fixed;
+    top: 0; left: 0;
+    display: flex;
+    flex-direction: column;
+    padding: 32px 0 24px;
+    z-index: 10;
+  }
+
+  .sidebar-logo {
+    font-family: 'Cinzel', serif;
+    font-size: 14px;
+    letter-spacing: 0.2em;
+    color: var(--accent);
+    padding: 0 24px 24px;
+    border-bottom: 1px solid var(--border);
+  }
+
+  .sidebar-logo span {
+    display: block;
+    font-size: 10px;
+    color: var(--text-dim);
+    letter-spacing: 0.15em;
+    margin-top: 4px;
+  }
+
+  .nav-group {
+    padding: 20px 0 0;
+  }
+
+  .nav-group-title {
+    font-size: 9px;
+    letter-spacing: 0.25em;
+    color: var(--text-dim);
+    padding: 0 24px 10px;
+    text-transform: uppercase;
+  }
+
+  .nav-item {
+    display: flex;
+    align-items: center;
+    gap: 10px;
+    padding: 9px 24px;
+    font-size: 12px;
+    color: var(--text-dim);
+    cursor: pointer;
+    text-decoration: none;
+    transition: all 0.2s;
+    border-left: 2px solid transparent;
+    letter-spacing: 0.05em;
+  }
+
+  .nav-item:hover {
+    color: var(--text);
+    background: var(--surface2);
+    border-left-color: var(--border);
+  }
+
+  .nav-item.active {
+    color: var(--accent);
+    background: rgba(45,212,191,0.06);
+    border-left-color: var(--accent);
+  }
+
+  .nav-dot {
+    width: 5px; height: 5px;
+    border-radius: 50%;
+    background: currentColor;
+    flex-shrink: 0;
+    opacity: 0.6;
+  }
+
+  /* ── 主內容 ── */
+  .main {
+    margin-left: var(--sidebar-w);
+    flex: 1;
+    padding: 48px 56px 80px;
+    max-width: 860px;
+  }
+
+  .page-header {
+    margin-bottom: 48px;
+    padding-bottom: 24px;
+    border-bottom: 1px solid var(--border);
+  }
+
+  .page-label {
+    font-size: 10px;
+    letter-spacing: 0.3em;
+    color: var(--accent);
+    text-transform: uppercase;
+    margin-bottom: 10px;
+  }
+
+  .page-title {
+    font-family: 'Cinzel', serif;
+    font-size: 28px;
+    font-weight: 600;
+    color: var(--text);
+    line-height: 1.3;
+  }
+
+  .page-sub {
+    font-size: 12px;
+    color: var(--text-dim);
+    margin-top: 8px;
+    letter-spacing: 0.05em;
+  }
+
+  /* ── 章節 ── */
+  .section {
+    margin-bottom: 60px;
+    scroll-margin-top: 40px;
+  }
+
+  .section-header {
+    display: flex;
+    align-items: center;
+    gap: 14px;
+    margin-bottom: 24px;
+    padding-bottom: 14px;
+    border-bottom: 1px solid var(--border);
+  }
+
+  .section-icon {
+    width: 32px; height: 32px;
+    border: 1px solid var(--border);
+    display: flex; align-items: center; justify-content: center;
+    font-size: 15px;
+    flex-shrink: 0;
+    background: var(--surface2);
+  }
+
+  .section-title {
+    font-family: 'Cinzel', serif;
+    font-size: 15px;
+    font-weight: 600;
+    color: var(--text);
+    letter-spacing: 0.08em;
+  }
+
+  .section-note {
+    font-size: 11px;
+    color: var(--text-dim);
+    margin-top: 3px;
+    letter-spacing: 0.05em;
+  }
+
+  /* ── 會畫/不畫 雙欄 ── */
+  .two-col {
+    display: grid;
+    grid-template-columns: 1fr 1fr;
+    gap: 16px;
+  }
+
+  .list-card {
+    background: var(--surface);
+    border: 1px solid var(--border);
+    padding: 18px 20px;
+    position: relative;
+    overflow: hidden;
+  }
+
+  .list-card::before {
+    content: '';
+    position: absolute;
+    top: 0; left: 0;
+    width: 100%; height: 2px;
+  }
+
+  .list-card.can::before { background: var(--accent); }
+  .list-card.cannot::before { background: var(--accent2); }
+
+  .list-card-title {
+    font-size: 11px;
+    letter-spacing: 0.15em;
+    text-transform: uppercase;
+    margin-bottom: 14px;
+    padding-bottom: 10px;
+    border-bottom: 1px solid var(--border);
+  }
+
+  .list-card.can .list-card-title { color: var(--accent); }
+  .list-card.cannot .list-card-title { color: var(--accent2); }
+
+  .list-item {
+    display: flex;
+    align-items: flex-start;
+    gap: 10px;
+    padding: 6px 0;
+    font-size: 13px;
+    color: var(--text-dim);
+    line-height: 1.6;
+    border-bottom: 1px solid rgba(30,51,48,0.5);
+  }
+
+  .list-item:last-child { border-bottom: none; }
+
+  .list-mark {
+    font-size: 11px;
+    margin-top: 2px;
+    flex-shrink: 0;
+  }
+
+  .list-card.can .list-mark { color: var(--accent); }
+  .list-card.cannot .list-mark { color: var(--accent2); }
+
+  .list-item em {
+    font-style: normal;
+    color: var(--text-dim);
+    font-size: 11px;
+  }
+
+  /* ── 一般資訊卡 ── */
+  .info-card {
+    background: var(--surface);
+    border: 1px solid var(--border);
+    border-left: 3px solid var(--accent);
+    padding: 18px 22px;
+    margin-bottom: 12px;
+    font-size: 13px;
+    color: var(--text-dim);
+    line-height: 1.8;
+  }
+
+  .info-card.warn {
+    border-left-color: var(--accent2);
+  }
+
+  .info-card strong {
+    color: var(--text);
+    font-weight: 500;
+  }
+
+  .info-card .tag {
+    display: inline-block;
+    font-size: 10px;
+    padding: 2px 8px;
+    border: 1px solid var(--border);
+    color: var(--text-dim);
+    margin-bottom: 8px;
+    letter-spacing: 0.1em;
+  }
+
+  /* ── 流程步驟 ── */
+  .steps {
+    display: flex;
+    flex-direction: column;
+    gap: 0;
+    position: relative;
+  }
+
+  .steps::before {
+    content: '';
+    position: absolute;
+    left: 19px;
+    top: 20px;
+    bottom: 20px;
+    width: 1px;
+    background: linear-gradient(to bottom, var(--accent), transparent);
+  }
+
+  .step {
+    display: flex;
+    gap: 20px;
+    padding: 0 0 24px;
+    position: relative;
+  }
+
+  .step-num {
+    width: 40px; height: 40px;
+    border: 1px solid var(--accent);
+    background: var(--surface);
+    display: flex; align-items: center; justify-content: center;
+    font-family: 'Cinzel', serif;
+    font-size: 13px;
+    color: var(--accent);
+    flex-shrink: 0;
+    z-index: 1;
+  }
+
+  .step-num.warn {
+    border-color: var(--accent2);
+    color: var(--accent2);
+    font-size: 16px;
+  }
+
+  .step-body {
+    background: var(--surface);
+    border: 1px solid var(--border);
+    padding: 14px 18px;
+    flex: 1;
+    margin-top: 0;
+  }
+
+  .step-title {
+    font-size: 12px;
+    letter-spacing: 0.12em;
+    color: var(--accent);
+    text-transform: uppercase;
+    margin-bottom: 8px;
+  }
+
+  .step-title.warn { color: var(--accent2); }
+
+  .step-desc {
+    font-size: 13px;
+    color: var(--text-dim);
+    line-height: 1.8;
+  }
+
+  .step-desc strong { color: var(--text); font-weight: 500; }
+
+  .step-note {
+    font-size: 11px;
+    color: var(--text-dim);
+    margin-top: 8px;
+    padding-top: 8px;
+    border-top: 1px solid var(--border);
+    opacity: 0.8;
+  }
+
+  /* ── 委託信模板 ── */
+  .template-box {
+    background: #0d1a17;
+    border: 1px solid var(--border);
+    border-left: 3px solid var(--accent);
+    padding: 18px 22px;
+    font-size: 12px;
+    color: var(--text-dim);
+    line-height: 2;
+    white-space: pre-line;
+    font-family: 'Noto Sans TC', monospace;
+    margin-top: 12px;
+  }
+
+  .template-label {
+    font-size: 10px;
+    letter-spacing: 0.2em;
+    color: var(--accent);
+    text-transform: uppercase;
+    margin-bottom: 8px;
+  }
+
+  /* ── 驚喜包區 ── */
+  .surprise-box {
+    background: var(--surface);
+    border: 1px solid var(--border);
+    padding: 20px 24px;
+    margin-bottom: 12px;
+  }
+
+  .surprise-title {
+    font-family: 'Cinzel', serif;
+    font-size: 13px;
+    color: var(--accent2);
+    margin-bottom: 10px;
+    letter-spacing: 0.1em;
+  }
+
+  /* ── 底部聲明 ── */
+  .footer-note {
+    margin-top: 48px;
+    padding: 20px 24px;
+    border: 1px solid var(--border);
+    border-top: 2px solid var(--accent2);
+    background: var(--surface);
+    font-size: 13px;
+    color: var(--text-dim);
+    line-height: 1.8;
+    text-align: center;
+  }
+
+  .footer-note strong { color: var(--accent2); }
+
+  /* ── 響應式 ── */
+  @media (max-width: 768px) {
+    .sidebar { transform: translateX(-100%); }
+    .main { margin-left: 0; padding: 24px 20px 60px; }
+    .two-col { grid-template-columns: 1fr; }
+  }
+</style>
+</head>
+<body>
+
+<!-- 左側索引 -->
+<nav class="sidebar">
+  <div class="sidebar-logo">
+    BIRU
+    <span>COMMISSION RULES</span>
+  </div>
+
+  <div class="nav-group">
+    <div class="nav-group-title">服務條款</div>
+    <a class="nav-item active" href="#will-draw">
+      <span class="nav-dot"></span>會畫 / 不畫
+    </a>
+    <a class="nav-item" href="#payment">
+      <span class="nav-dot"></span>付款 &amp; 退款
+    </a>
+    <a class="nav-item" href="#cancel">
+      <span class="nav-dot"></span>委託取消
+    </a>
+    <a class="nav-item" href="#usage">
+      <span class="nav-dot"></span>作品使用規範
+    </a>
+  </div>
+
+  <div class="nav-group">
+    <div class="nav-group-title">委託流程</div>
+    <a class="nav-item" href="#process">
+      <span class="nav-dot"></span>委託步驟
+    </a>
+    <a class="nav-item" href="#how-to">
+      <span class="nav-dot"></span>如何開始委託
+    </a>
+    <a class="nav-item" href="#surprise">
+      <span class="nav-dot"></span>什麼是驚喜包
+    </a>
+  </div>
+</nav>
+
+<!-- 主內容 -->
+<main class="main">
+
+  <div class="page-header">
+    <div class="page-label">Biru / ビル</div>
+    <div class="page-title">委託規範</div>
+    <div class="page-sub">服務條款 · 委託流程 · 作品使用規範</div>
+  </div>
+
+  <!-- ① 會畫/不畫 -->
+  <section class="section" id="will-draw">
+    <div class="section-header">
+      <div class="section-icon">✏️</div>
+      <div>
+        <div class="section-title">會畫的事項</div>
+        <div class="section-note">當我準備好其他項目時，將會更新此表。</div>
+      </div>
+    </div>
+
+    <div class="two-col">
+      <div class="list-card can">
+        <div class="list-card-title">✔ 我可以畫…</div>
+        <div class="list-item"><span class="list-mark">✔</span>原創角色</div>
+        <div class="list-item"><span class="list-mark">✔</span>二次創作</div>
+        <div class="list-item"><span class="list-mark">✔</span>性暗示</div>
+        <div class="list-item"><span class="list-mark">✔</span>人類</div>
+        <div class="list-item"><span class="list-mark">✔</span>獸人 | 非人 | 亞種</div>
+      </div>
+
+      <div class="list-card cannot">
+        <div class="list-card-title">✖ 我不畫…</div>
+        <div class="list-item"><span class="list-mark">✖</span>NSFW（R18 &amp; R18G）</div>
+        <div class="list-item"><span class="list-mark">✖</span>真人</div>
+        <div class="list-item"><span class="list-mark">✖</span>純文字設定 <em>※除了角色立繪以外</em></div>
+        <div class="list-item"><span class="list-mark">✖</span>非自願性委託 <em>※如未經同意拿他人設定委託</em></div>
+        <div class="list-item"><span class="list-mark">✖</span>大量血腥或恐怖元素</div>
+        <div class="list-item"><span class="list-mark">✖</span>機甲 | 機械</div>
+      </div>
+    </div>
+
+    <div class="info-card" style="margin-top:14px;">
+      如果你不大確定，歡迎來信詢問。
+    </div>
+  </section>
+
+  <!-- ② 付款 & 退款 -->
+  <section class="section" id="payment">
+    <div class="section-header">
+      <div class="section-icon">💰</div>
+      <div>
+        <div class="section-title">付款 &amp; 退款</div>
+        <div class="section-note">只接受轉帳及匯款｜中信銀行｜NTD</div>
+      </div>
+    </div>
+
+    <div class="info-card">
+      委託必須 <strong>一次付清</strong> 全部款項。
+    </div>
+    <div class="info-card warn">
+      如果因為某些因素需要取消，退款只會退回 <strong>30%</strong> 的款項。
+    </div>
+  </section>
+
+  <!-- ③ 委託取消 -->
+  <section class="section" id="cancel">
+    <div class="section-header">
+      <div class="section-icon">🚫</div>
+      <div>
+        <div class="section-title">委託取消</div>
+        <div class="section-note">為什麼被取消了…?</div>
+      </div>
+    </div>
+
+    <div class="info-card warn">
+      如果在 <strong>第一次</strong> 確認信寄出後的 <strong>七天內</strong> 沒有回覆，此筆委託將會視為取消。
+    </div>
+    <div class="info-card warn">
+      如果委託內容超出我的能力所及，我將會告知並取消此次委託。
+    </div>
+  </section>
+
+  <!-- ④ 作品使用規範 -->
+  <section class="section" id="usage">
+    <div class="section-header">
+      <div class="section-icon">⚠️</div>
+      <div>
+        <div class="section-title">關於委託完後的作品</div>
+        <div class="section-note">如有不大清楚，或沒提到，請再麻煩來信詢問！</div>
+      </div>
+    </div>
+
+    <div class="two-col">
+      <div class="list-card can">
+        <div class="list-card-title">✔ 委託者（你）後續可以…</div>
+        <div class="list-item"><span class="list-mark">✔</span><span>委託圖片可用於 <strong style="color:var(--text)">個人的非商業</strong> 用途。<br><em>例：印製小卡、徽章給自己使用</em></span></div>
+        <div class="list-item"><span class="list-mark">✔</span>發布委託圖片至社群或任何地方，請妥善的標註繪師名字。</div>
+      </div>
+
+      <div class="list-card cannot">
+        <div class="list-card-title">✖ 委託者（你）後續不行…</div>
+        <div class="list-item"><span class="list-mark">✖</span>移除我的簽名、浮水印。</div>
+        <div class="list-item"><span class="list-mark">✖</span>聲稱委託是自己畫的。</div>
+        <div class="list-item"><span class="list-mark">✖</span>二次編輯、裁切、改變內容、液化或描圖…等。</div>
+        <div class="list-item"><span class="list-mark">✖</span>使用委託圖做任何商業用途。</div>
+      </div>
+    </div>
+
+    <div class="info-card" style="margin-top:14px;">
+      委託完成後，將會排程發布至委託板上。<br>
+      我可能會在社群、個人作品集或任何自我推廣的地方發布圖片（<strong>會標註委託人！</strong>）。<br>
+      如果你不希望被公開，請事先告訴我！<br>
+      <em style="font-size:11px;">發布至社群的圖中，將會有網格狀浮水印蓋上。</em>
+    </div>
+    <div class="info-card">
+      委託圖將附上：<strong>添加浮水印的版本</strong>，以及 <strong>高解析度、無浮水印（僅附小簽名）</strong> 的版本，供個人使用。
+    </div>
+    <div class="info-card warn">
+      繪師有權利，因任何理由拒絕任何委託請求。
+    </div>
+  </section>
+
+  <!-- ⑤ 委託步驟 -->
+  <section class="section" id="process">
+    <div class="section-header">
+      <div class="section-icon">📋</div>
+      <div>
+        <div class="section-title">委託步驟</div>
+      </div>
+    </div>
+
+    <div class="steps">
+      <div class="step">
+        <div class="step-num">01</div>
+        <div class="step-body">
+          <div class="step-title">收到委託者的來信</div>
+          <div class="step-desc">繪師確認完後會回傳私訊或電子郵件，確認已收到你的委託，並與你進一步討論委託內容及金額確認。</div>
+        </div>
+      </div>
+
+      <div class="step">
+        <div class="step-num">02</div>
+        <div class="step-body">
+          <div class="step-title">委託者付款</div>
+          <div class="step-desc">委託者需要 <strong>一次付清</strong> 款項。我會在委託者付完全款後，才排入行程表，請注意。<br><strong>先完成，先服務！</strong></div>
+        </div>
+      </div>
+
+      <div class="step">
+        <div class="step-num">03</div>
+        <div class="step-body">
+          <div class="step-title">提供初步草圖</div>
+          <div class="step-desc">透過私訊／電子郵件提供粗略的初步草圖。<br>你可以 <strong>免費修改草圖 2 次</strong>，之後將不再接受任何重大更改。請務必在草圖階段確認你想要的畫面效果。</div>
+          <div class="step-note">※ 驚喜包將無法修改任何東西，除非有作畫上的失誤。例如：眼睛顏色、衣服設定…</div>
+        </div>
+      </div>
+
+      <div class="step">
+        <div class="step-num">04</div>
+        <div class="step-body">
+          <div class="step-title">提供完成稿預覽</div>
+          <div class="step-desc">透過私訊／電子郵件提供完成稿預覽。<br>如有需要，你可以提出 <strong>最後一次修改</strong>，僅限小幅調整（例如上色錯誤…等。）</div>
+        </div>
+      </div>
+
+      <div class="step">
+        <div class="step-num">05</div>
+        <div class="step-body">
+          <div class="step-title">委託完成！</div>
+          <div class="step-desc">你將會透過電子郵件收到該委託作品的完整解析度檔案！</div>
+          <div class="step-note">將會有原始大小的 PNG 檔、有浮水印的 PNG 檔。</div>
+        </div>
+      </div>
+
+      <div class="step">
+        <div class="step-num warn">⚠</div>
+        <div class="step-body">
+          <div class="step-title warn">注意事項</div>
+          <div class="step-desc">在我完成你的委託，且獲得你的確認（任何形式的確認皆算）後，交易即視為完成。此後你將無法再要求額外的圖片修改，也不得擅自修改。</div>
+        </div>
+      </div>
+
+      <div class="step">
+        <div class="step-num warn">⚠</div>
+        <div class="step-body">
+          <div class="step-title warn">關於用色</div>
+          <div class="step-desc">繪師用色多彩，基本不會用角色原本的顏色上色。請多參考提供的範例再決定是否委託喔。</div>
+        </div>
+      </div>
+    </div>
+  </section>
+
+  <!-- ⑥ 如何開始委託 -->
+  <section class="section" id="how-to">
+    <div class="section-header">
+      <div class="section-icon">📬</div>
+      <div>
+        <div class="section-title">如何開始委託</div>
+        <div class="section-note">首先請閱讀 服務條款 及 委託流程，然後…寄信給我吧！</div>
+      </div>
+    </div>
+
+    <div class="info-card">
+      📬 <strong>biruaruart@gmail.com</strong>
+    </div>
+
+    <div class="template-label">✏ 來信委託可複製用（一般委託）</div>
+    <div class="template-box">*** 一些禮貌性的招呼與對話 ***
+
+委託內容：塗鴉 - 頭像
+用途：給自己當頭像用
+需求：*** 對圖的需求 ***
+參考與角色描述：*** 描述你想要的樣子，及委託的角色介紹 ***
+其他你想說的話：可以額外說些什麼，或什麼都不說</div>
+  </section>
+
+  <!-- ⑦ 驚喜包 -->
+  <section class="section" id="surprise">
+    <div class="section-header">
+      <div class="section-icon">✨</div>
+      <div>
+        <div class="section-title">什麼是驚喜包？</div>
+        <div class="section-note">夢想、賭博 ✨</div>
+      </div>
+    </div>
+
+    <div class="info-card">
+      選擇任何一種驚喜包，給予角色外觀和設定描述，再許一些願望…<em>（或許願望會成真…！）</em><br>
+      就可以等待圖掉落啦！
+    </div>
+
+    <div class="template-label" style="margin-top:20px;">✏ 來信委託可複製用（驚喜包）</div>
+    <div class="template-box">*** 一些禮貌性的招呼與對話 ***
+
+委託內容：驚喜包 - Q版 2.5頭身
+參考與角色描述：*** 描述你想要的樣子，及委託的角色介紹 ***
+其他你想說的話：可以額外說些什麼，或什麼都不說
+額外：想多一隻寶可夢！
+許願：*** 一些願望 *** （※也許會成真！）</div>
+  </section>
+
+  <!-- 底部聲明 -->
+  <div class="footer-note">
+    <strong>下單委託即表示委託人已閱讀並同意所有規則。</strong><br>
+    若未遵守相關規則，我（繪師）有權拒絕該委託。
+  </div>
+
+</main>
+
+<script>
+  // 捲動時高亮對應的索引項
+  const sections = document.querySelectorAll('.section');
+  const navItems = document.querySelectorAll('.nav-item');
+
+  const observer = new IntersectionObserver((entries) => {
+    entries.forEach(entry => {
+      if (entry.isIntersecting) {
+        navItems.forEach(item => {
+          item.classList.toggle('active', item.getAttribute('href') === '#' + entry.target.id);
+        });
+      }
+    });
+  }, { rootMargin: '-30% 0px -60% 0px' });
+
+  sections.forEach(s => observer.observe(s));
+</script>
+</body>
+</html>
