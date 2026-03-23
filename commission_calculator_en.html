@@ -1,0 +1,319 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Biru — Commission Calculator</title>
+<style>
+  @import url('https://fonts.googleapis.com/css2?family=Cinzel:wght@400;600&family=Noto+Sans+TC:wght@300;400;500&display=swap');
+
+  :root {
+    --bg: #0a0f0e;
+    --surface: #111a18;
+    --surface2: #182420;
+    --border: #1e3330;
+    --accent: #2dd4bf;
+    --accent2: #e8633a;
+    --text: #e0f2f0;
+    --text-dim: #6b9e98;
+  }
+
+  * { box-sizing: border-box; margin: 0; padding: 0; }
+
+  body {
+    background: var(--bg);
+    color: var(--text);
+    font-family: 'Noto Sans TC', sans-serif;
+    min-height: 100vh;
+    padding: 40px 24px 80px;
+    max-width: 720px;
+    margin: 0 auto;
+  }
+
+  .header { margin-bottom: 36px; padding-bottom: 20px; border-bottom: 1px solid var(--border); }
+  .header-label { font-size: 10px; letter-spacing: 0.3em; color: var(--accent); text-transform: uppercase; margin-bottom: 8px; }
+  .header-title { font-family: 'Cinzel', serif; font-size: 22px; font-weight: 600; color: var(--text); }
+  .header-sub { font-size: 12px; color: var(--text-dim); margin-top: 6px; line-height: 1.7; }
+
+  .section { margin-bottom: 28px; }
+  .section.disabled { opacity: 0.35; pointer-events: none; }
+
+  .section-title {
+    font-size: 10px; letter-spacing: 0.2em; color: var(--accent);
+    text-transform: uppercase; margin-bottom: 12px;
+    display: flex; align-items: center; gap: 10px;
+  }
+  .section-title::after { content: ''; flex: 1; height: 1px; background: var(--border); }
+
+  .option-grid { display: grid; grid-template-columns: repeat(auto-fill, minmax(150px, 1fr)); gap: 8px; }
+  .option-grid.wide { grid-template-columns: repeat(auto-fill, minmax(200px, 1fr)); }
+
+  .opt { position: relative; cursor: pointer; }
+  .opt input { position: absolute; opacity: 0; width: 0; height: 0; }
+  .opt-label {
+    display: flex; flex-direction: column; gap: 4px;
+    padding: 12px 14px; background: var(--surface);
+    border: 1px solid var(--border); transition: all 0.18s; user-select: none;
+  }
+  .opt-label:hover { border-color: var(--text-dim); }
+  .opt input:checked + .opt-label { background: rgba(45,212,191,0.08); border-color: var(--accent); }
+  .opt.radio input:checked + .opt-label { background: rgba(232,99,58,0.08); border-color: var(--accent2); }
+  .opt-name { font-size: 13px; color: var(--text); line-height: 1.4; }
+  .opt-price { font-size: 11px; color: var(--text-dim); }
+  .opt input:checked + .opt-label .opt-price { color: var(--accent); }
+  .opt.radio input:checked + .opt-label .opt-price { color: var(--accent2); }
+  .opt-tag { display: inline-block; font-size: 9px; padding: 1px 6px; border: 1px solid var(--border); color: var(--text-dim); letter-spacing: 0.08em; margin-top: 2px; width: fit-content; }
+
+  .charaD-info {
+    display: none; background: var(--surface);
+    border: 1px solid var(--border); border-left: 3px solid var(--accent2);
+    padding: 16px 20px; gap: 16px; flex-direction: column;
+  }
+  .charaD-info.show { display: flex; }
+  .charaD-info-title { font-size: 10px; letter-spacing: 0.15em; color: var(--accent2); text-transform: uppercase; margin-bottom: 8px; }
+  .charaD-list { list-style: none; display: flex; flex-direction: column; gap: 6px; }
+  .charaD-list li { font-size: 13px; color: var(--text-dim); display: flex; align-items: flex-start; gap: 8px; line-height: 1.5; }
+  .charaD-list li::before { content: '◆'; font-size: 8px; color: var(--accent2); margin-top: 4px; flex-shrink: 0; }
+  .charaD-list li strong { color: var(--text); font-weight: 500; }
+
+  .surprise-notice {
+    display: none; background: rgba(232,99,58,0.07);
+    border: 1px solid rgba(232,99,58,0.3); border-left: 3px solid var(--accent2);
+    padding: 12px 16px; font-size: 12px; color: var(--text-dim); line-height: 1.7; margin-top: 12px;
+  }
+  .surprise-notice.show { display: block; }
+  .surprise-notice strong { color: var(--accent2); }
+
+  .result-wrap { position: sticky; bottom: 20px; margin-top: 32px; }
+  .result-box { background: var(--surface); border: 1px solid var(--border); border-top: 2px solid var(--accent); padding: 20px 24px; }
+  .result-label { font-size: 10px; letter-spacing: 0.2em; color: var(--accent); text-transform: uppercase; margin-bottom: 6px; }
+  .result-price { font-family: 'Cinzel', serif; font-size: 26px; color: var(--accent2); font-weight: 600; letter-spacing: 0.05em; }
+  .result-time { font-size: 13px; color: var(--text-dim); margin-top: 4px; }
+  .result-breakdown { margin-top: 16px; padding-top: 14px; border-top: 1px solid var(--border); display: flex; flex-direction: column; gap: 6px; }
+  .breakdown-row { display: flex; justify-content: space-between; font-size: 12px; color: var(--text-dim); }
+  .breakdown-row.total { color: var(--text); font-size: 13px; padding-top: 6px; border-top: 1px solid var(--border); margin-top: 2px; }
+  .breakdown-row span:last-child { color: var(--text); font-weight: 500; }
+  .result-note { margin-top: 14px; font-size: 11px; color: var(--text-dim); line-height: 1.7; padding-top: 12px; border-top: 1px solid var(--border); }
+  .result-note strong { color: var(--accent2); }
+  .empty-state { font-size: 13px; color: var(--text-dim); padding: 8px 0; }
+
+  @media (max-width: 480px) {
+    .option-grid { grid-template-columns: 1fr 1fr; }
+    .result-price { font-size: 22px; }
+  }
+</style>
+</head>
+<body>
+
+<div class="header">
+  <div class="header-label">Biru / ビル</div>
+  <div class="header-title">Commission Calculator</div>
+  <div class="header-sub">Select your options below to get an instant price estimate.<br>Final pricing will be confirmed via email. All prices are in USD.</div>
+</div>
+
+<!-- ① Commission Type -->
+<div class="section">
+  <div class="section-title">Commission Type</div>
+  <div class="option-grid wide">
+    <label class="opt radio"><input type="radio" name="type" value="illustration" data-price="50" data-time="3"><div class="opt-label"><span class="opt-name">Fantasia Impressionism</span><span class="opt-price">USD 50~</span><span class="opt-tag">ILLUSTRATION</span></div></label>
+    <label class="opt radio"><input type="radio" name="type" value="doodle" data-price="18" data-time="1"><div class="opt-label"><span class="opt-name">Doodle</span><span class="opt-price">USD 18~</span><span class="opt-tag">DOODLE</span></div></label>
+    <label class="opt radio"><input type="radio" name="type" value="light" data-price="25" data-time="2"><div class="opt-label"><span class="opt-name">Light Illustration</span><span class="opt-price">USD 25~</span><span class="opt-tag">LIGHT ILLUST</span></div></label>
+    <label class="opt radio"><input type="radio" name="type" value="charaD" data-price="100" data-time="4" data-charad="true"><div class="opt-label"><span class="opt-name">Character Design</span><span class="opt-price">USD 100~</span><span class="opt-tag">CHARA DESIGN</span></div></label>
+    <label class="opt radio"><input type="radio" name="type" value="sur" data-price="55" data-time="4" data-surprise="true"><div class="opt-label"><span class="opt-name">Art Nouveau Box</span><span class="opt-price">USD 55~</span><span class="opt-tag">ART NOUVEAU BOX</span></div></label>
+    <label class="opt radio"><input type="radio" name="type" value="surf" data-price="35" data-time="4" data-surprise="true"><div class="opt-label"><span class="opt-name">Floral Box</span><span class="opt-price">USD 35~</span><span class="opt-tag">FLORAL BOX</span></div></label>
+    <label class="opt radio"><input type="radio" name="type" value="pixel" data-price="15" data-time="2" data-surprise="true"><div class="opt-label"><span class="opt-name">Pixel Art Box</span><span class="opt-price">USD 15</span><span class="opt-tag">PIXEL ART</span></div></label>
+    <label class="opt radio"><input type="radio" name="type" value="chibi" data-price="22" data-time="1"><div class="opt-label"><span class="opt-name">Chibi</span><span class="opt-price">USD 22~</span><span class="opt-tag">CHIBI</span></div></label>
+    <label class="opt radio"><input type="radio" name="type" value="lineA" data-price="12" data-time="1"><div class="opt-label"><span class="opt-name">Line Art / Monochrome</span><span class="opt-price">USD 12~</span><span class="opt-tag">LINE ART</span></div></label>
+  </div>
+  <div class="surprise-notice" id="surpriseNotice">
+    <strong>※ Surprise Box commissions cannot be customized.</strong> The artist will create freely based on your character's design and backstory.<br>
+    The options below are for reference only and do not apply to Surprise Boxes.
+  </div>
+</div>
+
+<!-- ② Crop / Framing -->
+<div class="section" id="sectionCrop">
+  <div class="section-title">Framing</div>
+  <div id="normalCrop" class="option-grid">
+    <label class="opt radio"><input type="radio" name="crop" value="headshot" data-price="0" data-time="0"><div class="opt-label"><span class="opt-name">Headshot</span><span class="opt-price">Base price</span></div></label>
+    <label class="opt radio"><input type="radio" name="crop" value="bust" data-price="4" data-time="0"><div class="opt-label"><span class="opt-name">Bust / Chest-up</span><span class="opt-price">+USD 4</span></div></label>
+    <label class="opt radio"><input type="radio" name="crop" value="half" data-price="9" data-time="0"><div class="opt-label"><span class="opt-name">Half-body</span><span class="opt-price">+USD 9</span></div></label>
+    <label class="opt radio"><input type="radio" name="crop" value="full" data-price="18" data-time="1"><div class="opt-label"><span class="opt-name">Full-body</span><span class="opt-price">+USD 18</span></div></label>
+  </div>
+  <div class="charaD-info" id="charaDInfo">
+    <div>
+      <div class="charaD-info-title">Included</div>
+      <ul class="charaD-list">
+        <li>Full-body front &amp; back view</li>
+        <li>Expressions ×3</li>
+        <li>Bust portrait</li>
+        <li>Color palette</li>
+      </ul>
+    </div>
+    <div>
+      <div class="charaD-info-title">Choose one add-on</div>
+      <ul class="charaD-list">
+        <li><strong>Small illustration</strong> (character-related)</li>
+        <li><strong>Accessories / props</strong> (weapons, items, etc.)</li>
+      </ul>
+    </div>
+  </div>
+</div>
+
+<!-- ③ Background -->
+<div class="section" id="sectionBg">
+  <div class="section-title">Background</div>
+  <div class="option-grid">
+    <label class="opt radio"><input type="radio" name="bg" value="none" data-price="0" data-time="0"><div class="opt-label"><span class="opt-name">None / Flat color</span><span class="opt-price">Base price</span></div></label>
+    <label class="opt radio"><input type="radio" name="bg" value="simple" data-price="7" data-time="0"><div class="opt-label"><span class="opt-name">Simple background</span><span class="opt-price">+USD 7</span></div></label>
+    <label class="opt radio"><input type="radio" name="bg" value="complex" data-price="22" data-time="1"><div class="opt-label"><span class="opt-name">Complex background</span><span class="opt-price">+USD 22</span></div></label>
+  </div>
+</div>
+
+<!-- ④ Add-ons -->
+<div class="section" id="sectionAddon">
+  <div class="section-title">Add-ons (select multiple)</div>
+  <div class="option-grid">
+    <label class="opt"><input type="checkbox" name="addon" value="extra_char" data-price="15" data-time="1"><div class="opt-label"><span class="opt-name">Extra character ×1</span><span class="opt-price">+USD 15</span></div></label>
+    <label class="opt"><input type="checkbox" name="addon" value="extra_char2" data-price="15" data-time="1"><div class="opt-label"><span class="opt-name">Extra character ×2</span><span class="opt-price">+USD 30</span></div></label>
+    <label class="opt"><input type="checkbox" name="addon" value="pet" data-price="7" data-time="0"><div class="opt-label"><span class="opt-name">Pet / small animal</span><span class="opt-price">+USD 7</span></div></label>
+    <label class="opt"><input type="checkbox" name="addon" value="complex_outfit" data-price="11" data-time="0"><div class="opt-label"><span class="opt-name">Complex outfit / accessories</span><span class="opt-price">+USD 11</span></div></label>
+    <label class="opt"><input type="checkbox" name="addon" value="prop" data-price="6" data-time="0"><div class="opt-label"><span class="opt-name">Prop / object</span><span class="opt-price">+USD 6</span></div></label>
+  </div>
+</div>
+
+<!-- Result -->
+<div class="result-wrap">
+  <div class="result-box">
+    <div>
+      <div class="result-label">Estimated Price</div>
+      <div class="result-price" id="resultPrice">—</div>
+      <div class="result-time" id="resultTime">Please select a commission type</div>
+    </div>
+    <div class="result-breakdown" id="breakdown">
+      <div class="empty-state">Select options to see breakdown</div>
+    </div>
+    <div class="result-note">
+      ※ This is an <strong>estimate only</strong>. Final pricing will be confirmed via email.<br>
+      Surprise Box prices may vary at the artist's discretion.<br>
+      Payment via PayPal · 📬 biruaruart@gmail.com
+    </div>
+  </div>
+</div>
+
+<script>
+(function() {
+  var timeLabels = {
+    1: 'approx. 1~2 weeks',
+    2: 'approx. 2~3 weeks',
+    3: 'approx. 3 weeks ~ 1 month',
+    4: 'approx. 1 month',
+    5: 'approx. 1~1.5 months',
+    6: 'approx. 1.5 months or more'
+  };
+
+  function clampTime(t) {
+    if (t <= 1) return 1;
+    if (t >= 6) return 6;
+    return t;
+  }
+
+  function getText(input) {
+    return input.parentNode.querySelector('.opt-name').textContent;
+  }
+
+  function updateLayout(isCharaD, isSurprise) {
+    var normalCrop   = document.getElementById('normalCrop');
+    var charaDInfo   = document.getElementById('charaDInfo');
+    var sectionCrop  = document.getElementById('sectionCrop');
+    var sectionBg    = document.getElementById('sectionBg');
+    var sectionAddon = document.getElementById('sectionAddon');
+    var notice       = document.getElementById('surpriseNotice');
+
+    if (isCharaD) {
+      normalCrop.style.display = 'none';
+      charaDInfo.classList.add('show');
+      sectionBg.classList.add('disabled');
+      sectionAddon.classList.add('disabled');
+      sectionCrop.classList.remove('disabled');
+      notice.classList.remove('show');
+      document.querySelectorAll('input[name="bg"], input[name="addon"]').forEach(function(el) { el.checked = false; });
+    } else if (isSurprise) {
+      normalCrop.style.display = '';
+      charaDInfo.classList.remove('show');
+      sectionCrop.classList.add('disabled');
+      sectionBg.classList.add('disabled');
+      sectionAddon.classList.add('disabled');
+      notice.classList.add('show');
+      document.querySelectorAll('input[name="crop"], input[name="bg"], input[name="addon"]').forEach(function(el) { el.checked = false; });
+    } else {
+      normalCrop.style.display = '';
+      charaDInfo.classList.remove('show');
+      sectionCrop.classList.remove('disabled');
+      sectionBg.classList.remove('disabled');
+      sectionAddon.classList.remove('disabled');
+      notice.classList.remove('show');
+    }
+  }
+
+  function calc() {
+    var total      = 0;
+    var totalTime  = 0;
+    var rows       = [];
+    var isCharaD   = false;
+    var isSurprise = false;
+
+    var typeEl = document.querySelector('input[name="type"]:checked');
+    if (!typeEl) {
+      document.getElementById('resultPrice').textContent = '—';
+      document.getElementById('resultTime').textContent  = 'Please select a commission type';
+      document.getElementById('breakdown').innerHTML     = '<div class="empty-state">Select options to see breakdown</div>';
+      updateLayout(false, false);
+      return;
+    }
+
+    isCharaD   = typeEl.dataset.charad   === 'true';
+    isSurprise = typeEl.dataset.surprise === 'true';
+    var tp = parseInt(typeEl.dataset.price);
+    var tt = parseInt(typeEl.dataset.time);
+    total += tp; totalTime += tt;
+    rows.push({ name: getText(typeEl), price: tp });
+
+    updateLayout(isCharaD, isSurprise);
+
+    if (!isCharaD) {
+      var cropEl = document.querySelector('input[name="crop"]:checked');
+      if (cropEl) {
+        var cp = parseInt(cropEl.dataset.price);
+        if (cp > 0) { total += cp; totalTime += parseInt(cropEl.dataset.time); rows.push({ name: getText(cropEl), price: cp }); }
+      }
+      var bgEl = document.querySelector('input[name="bg"]:checked');
+      if (bgEl) {
+        var bp = parseInt(bgEl.dataset.price);
+        if (bp > 0) { total += bp; totalTime += parseInt(bgEl.dataset.time); rows.push({ name: getText(bgEl), price: bp }); }
+      }
+      document.querySelectorAll('input[name="addon"]:checked').forEach(function(el) {
+        var ap = parseInt(el.dataset.price);
+        total += ap; totalTime += parseInt(el.dataset.time);
+        rows.push({ name: getText(el), price: ap });
+      });
+    }
+
+    document.getElementById('resultPrice').textContent = 'USD ' + total + '~';
+    document.getElementById('resultTime').textContent  = '⏱ Estimated time: ' + (timeLabels[clampTime(totalTime)] || 'approx. 1.5 months or more');
+
+    var bd   = document.getElementById('breakdown');
+    var html = rows.map(function(r) {
+      return '<div class="breakdown-row"><span>' + r.name + '</span><span>USD ' + r.price + '</span></div>';
+    }).join('');
+    html += '<div class="breakdown-row total"><span>Total (from)</span><span>USD ' + total + '</span></div>';
+    bd.innerHTML = html;
+  }
+
+  document.querySelectorAll('input[type="radio"], input[type="checkbox"]').forEach(function(el) {
+    el.addEventListener('change', calc);
+  });
+})();
+</script>
+</body>
+</html>
