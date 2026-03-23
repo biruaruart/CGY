@@ -302,4 +302,14 @@
     var html = rows.map(function(r) {
       return '<div class="breakdown-row"><span>' + r.name + '</span><span>NTD ' + r.price.toLocaleString() + '</span></div>';
     }).join('');
-    html += '<div class="breakdown-row total"><span>合計（起）</span><span>NTD ' + total.toLocaleStri
+    html += '<div class="breakdown-row total"><span>合計（起）</span><span>NTD ' + total.toLocaleString() + '</span></div>';
+    bd.innerHTML = html;
+  }
+
+  document.querySelectorAll('input[type="radio"], input[type="checkbox"]').forEach(function(el) {
+    el.addEventListener('change', calc);
+  });
+})();
+</script>
+</body>
+</html>
