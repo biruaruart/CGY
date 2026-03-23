@@ -1,0 +1,305 @@
+<!DOCTYPE html>
+<html lang="zh-TW">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Biru — 委託試算</title>
+<style>
+  @import url('https://fonts.googleapis.com/css2?family=Cinzel:wght@400;600&family=Noto+Sans+TC:wght@300;400;500&display=swap');
+
+  :root {
+    --bg: #0a0f0e;
+    --surface: #111a18;
+    --surface2: #182420;
+    --border: #1e3330;
+    --accent: #2dd4bf;
+    --accent2: #e8633a;
+    --text: #e0f2f0;
+    --text-dim: #6b9e98;
+  }
+
+  * { box-sizing: border-box; margin: 0; padding: 0; }
+
+  body {
+    background: var(--bg);
+    color: var(--text);
+    font-family: 'Noto Sans TC', sans-serif;
+    min-height: 100vh;
+    padding: 40px 24px 80px;
+    max-width: 720px;
+    margin: 0 auto;
+  }
+
+  .header {
+    margin-bottom: 36px;
+    padding-bottom: 20px;
+    border-bottom: 1px solid var(--border);
+  }
+  .header-label { font-size: 10px; letter-spacing: 0.3em; color: var(--accent); text-transform: uppercase; margin-bottom: 8px; }
+  .header-title { font-family: 'Cinzel', serif; font-size: 22px; font-weight: 600; color: var(--text); }
+  .header-sub { font-size: 12px; color: var(--text-dim); margin-top: 6px; line-height: 1.7; }
+
+  .section { margin-bottom: 28px; }
+  .section.disabled { opacity: 0.35; pointer-events: none; }
+
+  .section-title {
+    font-size: 10px; letter-spacing: 0.2em; color: var(--accent);
+    text-transform: uppercase; margin-bottom: 12px;
+    display: flex; align-items: center; gap: 10px;
+  }
+  .section-title::after { content: ''; flex: 1; height: 1px; background: var(--border); }
+
+  .option-grid { display: grid; grid-template-columns: repeat(auto-fill, minmax(150px, 1fr)); gap: 8px; }
+  .option-grid.wide { grid-template-columns: repeat(auto-fill, minmax(200px, 1fr)); }
+
+  .opt { position: relative; cursor: pointer; }
+  .opt input { position: absolute; opacity: 0; width: 0; height: 0; }
+  .opt-label {
+    display: flex; flex-direction: column; gap: 4px;
+    padding: 12px 14px; background: var(--surface);
+    border: 1px solid var(--border); transition: all 0.18s; user-select: none;
+  }
+  .opt-label:hover { border-color: var(--text-dim); }
+  .opt input:checked + .opt-label { background: rgba(45,212,191,0.08); border-color: var(--accent); }
+  .opt.radio input:checked + .opt-label { background: rgba(232,99,58,0.08); border-color: var(--accent2); }
+  .opt-name { font-size: 13px; color: var(--text); line-height: 1.4; }
+  .opt-price { font-size: 11px; color: var(--text-dim); }
+  .opt input:checked + .opt-label .opt-price { color: var(--accent); }
+  .opt.radio input:checked + .opt-label .opt-price { color: var(--accent2); }
+  .opt-tag { display: inline-block; font-size: 9px; padding: 1px 6px; border: 1px solid var(--border); color: var(--text-dim); letter-spacing: 0.08em; margin-top: 2px; width: fit-content; }
+
+  /* 角色設計說明區 */
+  .charaD-info {
+    display: none; background: var(--surface);
+    border: 1px solid var(--border); border-left: 3px solid var(--accent2);
+    padding: 16px 20px; gap: 16px; flex-direction: column;
+  }
+  .charaD-info.show { display: flex; }
+  .charaD-info-title { font-size: 10px; letter-spacing: 0.15em; color: var(--accent2); text-transform: uppercase; margin-bottom: 8px; }
+  .charaD-list { list-style: none; display: flex; flex-direction: column; gap: 6px; }
+  .charaD-list li { font-size: 13px; color: var(--text-dim); display: flex; align-items: flex-start; gap: 8px; line-height: 1.5; }
+  .charaD-list li::before { content: '◆'; font-size: 8px; color: var(--accent2); margin-top: 4px; flex-shrink: 0; }
+  .charaD-list li strong { color: var(--text); font-weight: 500; }
+
+  /* 驚喜包提示 */
+  .surprise-notice {
+    display: none; background: rgba(232,99,58,0.07);
+    border: 1px solid rgba(232,99,58,0.3); border-left: 3px solid var(--accent2);
+    padding: 12px 16px; font-size: 12px; color: var(--text-dim); line-height: 1.7; margin-top: 12px;
+  }
+  .surprise-notice.show { display: block; }
+  .surprise-notice strong { color: var(--accent2); }
+
+  /* 結果 */
+  .result-wrap { position: sticky; bottom: 20px; margin-top: 32px; }
+  .result-box { background: var(--surface); border: 1px solid var(--border); border-top: 2px solid var(--accent); padding: 20px 24px; }
+  .result-label { font-size: 10px; letter-spacing: 0.2em; color: var(--accent); text-transform: uppercase; margin-bottom: 6px; }
+  .result-price { font-family: 'Cinzel', serif; font-size: 26px; color: var(--accent2); font-weight: 600; letter-spacing: 0.05em; }
+  .result-time { font-size: 13px; color: var(--text-dim); margin-top: 4px; }
+  .result-breakdown { margin-top: 16px; padding-top: 14px; border-top: 1px solid var(--border); display: flex; flex-direction: column; gap: 6px; }
+  .breakdown-row { display: flex; justify-content: space-between; font-size: 12px; color: var(--text-dim); }
+  .breakdown-row.total { color: var(--text); font-size: 13px; padding-top: 6px; border-top: 1px solid var(--border); margin-top: 2px; }
+  .breakdown-row span:last-child { color: var(--text); font-weight: 500; }
+  .result-note { margin-top: 14px; font-size: 11px; color: var(--text-dim); line-height: 1.7; padding-top: 12px; border-top: 1px solid var(--border); }
+  .result-note strong { color: var(--accent2); }
+  .empty-state { font-size: 13px; color: var(--text-dim); padding: 8px 0; }
+
+  @media (max-width: 480px) {
+    .option-grid { grid-template-columns: 1fr 1fr; }
+    .result-price { font-size: 22px; }
+  }
+</style>
+</head>
+<body>
+
+<div class="header">
+  <div class="header-label">Biru / ビル</div>
+  <div class="header-title">委託試算表</div>
+  <div class="header-sub">選擇項目後，下方會即時顯示大概費用與時間。<br>實際金額依委託內容而定，僅供參考。</div>
+</div>
+
+<!-- ① 委託類型 -->
+<div class="section">
+  <div class="section-title">委託類型</div>
+  <div class="option-grid wide">
+    <label class="opt radio"><input type="radio" name="type" value="illustration" data-price="1000" data-time="3"><div class="opt-label"><span class="opt-name">幻想印象派</span><span class="opt-price">NTD 1,000～</span><span class="opt-tag">ILLUSTRATION</span></div></label>
+    <label class="opt radio"><input type="radio" name="type" value="doodle" data-price="500" data-time="1"><div class="opt-label"><span class="opt-name">塗鴉</span><span class="opt-price">NTD 500～</span><span class="opt-tag">DOODLE</span></div></label>
+    <label class="opt radio"><input type="radio" name="type" value="light" data-price="700" data-time="2"><div class="opt-label"><span class="opt-name">小品插畫</span><span class="opt-price">NTD 700～</span><span class="opt-tag">LIGHT ILLUST</span></div></label>
+    <label class="opt radio"><input type="radio" name="type" value="charaD" data-price="3000" data-time="4" data-charad="true"><div class="opt-label"><span class="opt-name">角色設計</span><span class="opt-price">NTD 3,000～</span><span class="opt-tag">CHARA DESIGN</span></div></label>
+    <label class="opt radio"><input type="radio" name="type" value="sur" data-price="1500" data-time="4" data-surprise="true"><div class="opt-label"><span class="opt-name">新藝術驚喜包</span><span class="opt-price">NTD 1,500～</span><span class="opt-tag">ART NOUVEAU BOX</span></div></label>
+    <label class="opt radio"><input type="radio" name="type" value="surf" data-price="1000" data-time="4" data-surprise="true"><div class="opt-label"><span class="opt-name">花卉驚喜包</span><span class="opt-price">NTD 1,000～</span><span class="opt-tag">FLORAL BOX</span></div></label>
+    <label class="opt radio"><input type="radio" name="type" value="pixel" data-price="450" data-time="2" data-surprise="true"><div class="opt-label"><span class="opt-name">點陣驚喜包</span><span class="opt-price">NTD 450</span><span class="opt-tag">PIXEL ART</span></div></label>
+    <label class="opt radio"><input type="radio" name="type" value="chibi" data-price="600" data-time="1"><div class="opt-label"><span class="opt-name">Q版插畫</span><span class="opt-price">NTD 600～</span><span class="opt-tag">CHIBI</span></div></label>
+    <label class="opt radio"><input type="radio" name="type" value="lineA" data-price="300" data-time="1"><div class="opt-label"><span class="opt-name">線稿單色</span><span class="opt-price">NTD 300～</span><span class="opt-tag">LINE ART</span></div></label>
+  </div>
+  <div class="surprise-notice" id="surpriseNotice">
+    <strong>※ 驚喜包無法自行選擇構圖與附加選項</strong>，畫師會依角色設定自由發揮。<br>
+    下方選項僅供參考，實際內容以畫師決定為主。
+  </div>
+</div>
+
+<!-- ② 構圖 -->
+<div class="section" id="sectionCrop">
+  <div class="section-title">構圖範圍</div>
+  <div id="normalCrop" class="option-grid">
+    <label class="opt radio"><input type="radio" name="crop" value="headshot" data-price="0" data-time="0"><div class="opt-label"><span class="opt-name">頭像</span><span class="opt-price">基本價</span></div></label>
+    <label class="opt radio"><input type="radio" name="crop" value="bust" data-price="100" data-time="0"><div class="opt-label"><span class="opt-name">胸像 / 至胸</span><span class="opt-price">+NTD 100</span></div></label>
+    <label class="opt radio"><input type="radio" name="crop" value="half" data-price="250" data-time="0"><div class="opt-label"><span class="opt-name">半身</span><span class="opt-price">+NTD 250</span></div></label>
+    <label class="opt radio"><input type="radio" name="crop" value="full" data-price="500" data-time="1"><div class="opt-label"><span class="opt-name">全身</span><span class="opt-price">+NTD 500</span></div></label>
+  </div>
+  <div class="charaD-info" id="charaDInfo">
+    <div>
+      <div class="charaD-info-title">包含內容</div>
+      <ul class="charaD-list">
+        <li>全身正面 &amp; 背面</li>
+        <li>基本表情 ×3</li>
+        <li>胸像</li>
+        <li>色票</li>
+      </ul>
+    </div>
+    <div>
+      <div class="charaD-info-title">額外可自選一項</div>
+      <ul class="charaD-list">
+        <li><strong>小插畫</strong>（角色相關的小型插圖）</li>
+        <li><strong>角色配件</strong>（武器、道具、專屬物件等）</li>
+      </ul>
+    </div>
+  </div>
+</div>
+
+<!-- ③ 背景 -->
+<div class="section" id="sectionBg">
+  <div class="section-title">背景</div>
+  <div class="option-grid">
+    <label class="opt radio"><input type="radio" name="bg" value="none" data-price="0" data-time="0"><div class="opt-label"><span class="opt-name">無背景 / 純色</span><span class="opt-price">基本價</span></div></label>
+    <label class="opt radio"><input type="radio" name="bg" value="simple" data-price="200" data-time="0"><div class="opt-label"><span class="opt-name">簡單背景</span><span class="opt-price">+NTD 200</span></div></label>
+    <label class="opt radio"><input type="radio" name="bg" value="complex" data-price="600" data-time="1"><div class="opt-label"><span class="opt-name">複雜背景</span><span class="opt-price">+NTD 600</span></div></label>
+  </div>
+</div>
+
+<!-- ④ 附加選項 -->
+<div class="section" id="sectionAddon">
+  <div class="section-title">附加選項（可複選）</div>
+  <div class="option-grid">
+    <label class="opt"><input type="checkbox" name="addon" value="extra_char" data-price="400" data-time="1"><div class="opt-label"><span class="opt-name">追加角色 ×1</span><span class="opt-price">+NTD 400</span></div></label>
+    <label class="opt"><input type="checkbox" name="addon" value="extra_char2" data-price="400" data-time="1"><div class="opt-label"><span class="opt-name">追加角色 ×2</span><span class="opt-price">+NTD 800</span></div></label>
+    <label class="opt"><input type="checkbox" name="addon" value="pet" data-price="200" data-time="0"><div class="opt-label"><span class="opt-name">小動物 / 寵物</span><span class="opt-price">+NTD 200</span></div></label>
+    <label class="opt"><input type="checkbox" name="addon" value="complex_outfit" data-price="300" data-time="0"><div class="opt-label"><span class="opt-name">複雜服裝 / 配件</span><span class="opt-price">+NTD 300</span></div></label>
+    <label class="opt"><input type="checkbox" name="addon" value="prop" data-price="150" data-time="0"><div class="opt-label"><span class="opt-name">道具 / 物件</span><span class="opt-price">+NTD 150</span></div></label>
+  </div>
+</div>
+
+<!-- 結果 -->
+<div class="result-wrap">
+  <div class="result-box">
+    <div>
+      <div class="result-label">預估金額</div>
+      <div class="result-price" id="resultPrice">—</div>
+      <div class="result-time" id="resultTime">請先選擇委託類型</div>
+    </div>
+    <div class="result-breakdown" id="breakdown">
+      <div class="empty-state">選擇項目後顯示明細</div>
+    </div>
+    <div class="result-note">
+      ※ 以上為<strong>估算參考</strong>，實際報價以來信確認為準。<br>
+      驚喜包類型不接受修改，價格依畫師判斷調整。<br>
+      📬 <a href="/cdn-cgi/l/email-protection" class="__cf_email__" data-cfemail="23414a515642515642515763444e424a4f0d404c4e">[email&#160;protected]</a>
+    </div>
+  </div>
+</div>
+
+<script data-cfasync="false" src="/cdn-cgi/scripts/5c5dd728/cloudflare-static/email-decode.min.js"></script><script>
+(function() {
+  var timeLabels = {
+    1: '約 1～2 週',
+    2: '約 2～3 週',
+    3: '約 3 週～1 個月',
+    4: '約 1 個月',
+    5: '約 1～1.5 個月',
+    6: '約 1.5 個月以上'
+  };
+
+  function clampTime(t) {
+    if (t <= 1) return 1;
+    if (t >= 6) return 6;
+    return t;
+  }
+
+  function getText(input) {
+    return input.parentNode.querySelector('.opt-name').textContent;
+  }
+
+  function updateLayout(isCharaD, isSurprise) {
+    var normalCrop   = document.getElementById('normalCrop');
+    var charaDInfo   = document.getElementById('charaDInfo');
+    var sectionBg    = document.getElementById('sectionBg');
+    var sectionAddon = document.getElementById('sectionAddon');
+    var notice       = document.getElementById('surpriseNotice');
+
+    if (isCharaD) {
+      normalCrop.style.display = 'none';
+      charaDInfo.classList.add('show');
+      sectionBg.classList.add('disabled');
+      sectionAddon.classList.add('disabled');
+      notice.classList.remove('show');
+      document.querySelectorAll('input[name="bg"], input[name="addon"]').forEach(function(el) { el.checked = false; });
+    } else {
+      normalCrop.style.display = '';
+      charaDInfo.classList.remove('show');
+      sectionBg.classList.remove('disabled');
+      sectionAddon.classList.remove('disabled');
+      notice.classList.toggle('show', isSurprise);
+    }
+  }
+
+  function calc() {
+    var total     = 0;
+    var totalTime = 0;
+    var rows      = [];
+    var isCharaD  = false;
+    var isSurprise = false;
+
+    var typeEl = document.querySelector('input[name="type"]:checked');
+    if (!typeEl) {
+      document.getElementById('resultPrice').textContent = '—';
+      document.getElementById('resultTime').textContent  = '請先選擇委託類型';
+      document.getElementById('breakdown').innerHTML     = '<div class="empty-state">選擇項目後顯示明細</div>';
+      updateLayout(false, false);
+      return;
+    }
+
+    isCharaD   = typeEl.dataset.charad   === 'true';
+    isSurprise = typeEl.dataset.surprise === 'true';
+    var tp = parseInt(typeEl.dataset.price);
+    var tt = parseInt(typeEl.dataset.time);
+    total += tp; totalTime += tt;
+    rows.push({ name: getText(typeEl), price: tp });
+
+    updateLayout(isCharaD, isSurprise);
+
+    if (!isCharaD) {
+      var cropEl = document.querySelector('input[name="crop"]:checked');
+      if (cropEl) {
+        var cp = parseInt(cropEl.dataset.price);
+        if (cp > 0) { total += cp; totalTime += parseInt(cropEl.dataset.time); rows.push({ name: getText(cropEl), price: cp }); }
+      }
+      var bgEl = document.querySelector('input[name="bg"]:checked');
+      if (bgEl) {
+        var bp = parseInt(bgEl.dataset.price);
+        if (bp > 0) { total += bp; totalTime += parseInt(bgEl.dataset.time); rows.push({ name: getText(bgEl), price: bp }); }
+      }
+      document.querySelectorAll('input[name="addon"]:checked').forEach(function(el) {
+        var ap = parseInt(el.dataset.price);
+        total += ap; totalTime += parseInt(el.dataset.time);
+        rows.push({ name: getText(el), price: ap });
+      });
+    }
+
+    document.getElementById('resultPrice').textContent = 'NTD ' + total.toLocaleString() + '～';
+    document.getElementById('resultTime').textContent  = '⏱ 預估時間：' + (timeLabels[clampTime(totalTime)] || '約 1 個月以上');
+
+    var bd   = document.getElementById('breakdown');
+    var html = rows.map(function(r) {
+      return '<div class="breakdown-row"><span>' + r.name + '</span><span>NTD ' + r.price.toLocaleString() + '</span></div>';
+    }).join('');
+    html += '<div class="breakdown-row total"><span>合計（起）</span><span>NTD ' + total.toLocaleStri
