@@ -232,6 +232,7 @@
   function updateLayout(isCharaD, isSurprise) {
     var normalCrop   = document.getElementById('normalCrop');
     var charaDInfo   = document.getElementById('charaDInfo');
+    var sectionCrop  = document.getElementById('sectionCrop');
     var sectionBg    = document.getElementById('sectionBg');
     var sectionAddon = document.getElementById('sectionAddon');
     var notice       = document.getElementById('surpriseNotice');
@@ -241,14 +242,24 @@
       charaDInfo.classList.add('show');
       sectionBg.classList.add('disabled');
       sectionAddon.classList.add('disabled');
+      sectionCrop.classList.remove('disabled');
       notice.classList.remove('show');
       document.querySelectorAll('input[name="bg"], input[name="addon"]').forEach(function(el) { el.checked = false; });
+    } else if (isSurprise) {
+      normalCrop.style.display = '';
+      charaDInfo.classList.remove('show');
+      sectionCrop.classList.add('disabled');
+      sectionBg.classList.add('disabled');
+      sectionAddon.classList.add('disabled');
+      notice.classList.add('show');
+      document.querySelectorAll('input[name="crop"], input[name="bg"], input[name="addon"]').forEach(function(el) { el.checked = false; });
     } else {
       normalCrop.style.display = '';
       charaDInfo.classList.remove('show');
+      sectionCrop.classList.remove('disabled');
       sectionBg.classList.remove('disabled');
       sectionAddon.classList.remove('disabled');
-      notice.classList.toggle('show', isSurprise);
+      notice.classList.remove('show');
     }
   }
 
