@@ -218,9 +218,10 @@
 </div>
 
 <script>
-// 注意看！這裡已經修改為安全可靠的相對路徑了！
-const BASE = './';
+const BASE = 'https://biruaruart.github.io/CGY/';
 let currentLang = 'zh';
+let currentCategory = 'illustration';
+let currentIndex = 0;
 
 const categories = {
   illustration: {
@@ -285,10 +286,10 @@ const categories = {
     images: [
       { src: BASE+'sur_01.png', commissioner: 'Anonymous', piecePrice: { zh: '約 NTD 1,500+', en: 'Approx. USD 55+' }, tags: [{ zh: '全身', en: 'Full-body', h: true }, { zh: '新藝術風', en: 'Art Nouveau', h: false }, { zh: '自由發揮', en: 'Artist Freedom', h: true }] },
       { src: BASE+'sur_02.png', commissioner: 'Anonymous', piecePrice: { zh: '約 NTD 1,500+', en: 'Approx. USD 55+' }, tags: [{ zh: '半身', en: 'Half-body', h: true }, { zh: '新藝術風', en: 'Art Nouveau', h: false }, { zh: '自由發揮', en: 'Artist Freedom', h: true }] },
-      { src: BASE+'surf_01.png', commissioner: 'Anonymous', piecePrice: { zh: '約 NTD 1,000+', en: 'Approx. USD 35+' }, tags: [{ zh: '花卉', en: 'Floral', h: true }, { zh: '時序', en: 'Seasonal', h: false }, { zh: '自由發揮', en: 'Artist Freedom', h: true }] },
-      { src: BASE+'surf_02.png', commissioner: 'Anonymous', piecePrice: { zh: '約 NTD 1,000+', en: 'Approx. USD 35+' }, tags: [{ zh: '花卉', en: 'Floral', h: true }, { zh: '時序', en: 'Seasonal', h: false }, { zh: '自由發揮', en: 'Artist Freedom', h: true }] },
-      { src: BASE+'surf_03.png', commissioner: 'Anonymous', piecePrice: { zh: '約 NTD 1,000+', en: 'Approx. USD 35+' }, tags: [{ zh: '花卉', en: 'Floral', h: true }, { zh: '時序', en: 'Seasonal', h: false }, { zh: '自由發揮', en: 'Artist Freedom', h: true }] },
-      { src: BASE+'surf_04.png', commissioner: 'Anonymous', piecePrice: { zh: '約 NTD 1,000+', en: 'Approx. USD 35+' }, tags: [{ zh: '花卉', en: 'Floral', h: true }, { zh: '時序', en: 'Seasonal', h: false }, { zh: '自由發揮', en: 'Artist Freedom', h: true }] },
+      { src: BASE+'surF_01.png', commissioner: 'Anonymous', piecePrice: { zh: '約 NTD 1,000+', en: 'Approx. USD 35+' }, tags: [{ zh: '花卉', en: 'Floral', h: true }, { zh: '時序', en: 'Seasonal', h: false }, { zh: '自由發揮', en: 'Artist Freedom', h: true }] },
+      { src: BASE+'surF_02.png', commissioner: 'Anonymous', piecePrice: { zh: '約 NTD 1,000+', en: 'Approx. USD 35+' }, tags: [{ zh: '花卉', en: 'Floral', h: true }, { zh: '時序', en: 'Seasonal', h: false }, { zh: '自由發揮', en: 'Artist Freedom', h: true }] },
+      { src: BASE+'surF_03.png', commissioner: 'Anonymous', piecePrice: { zh: '約 NTD 1,000+', en: 'Approx. USD 35+' }, tags: [{ zh: '花卉', en: 'Floral', h: true }, { zh: '時序', en: 'Seasonal', h: false }, { zh: '自由發揮', en: 'Artist Freedom', h: true }] },
+      { src: BASE+'surF_04.png', commissioner: 'Anonymous', piecePrice: { zh: '約 NTD 1,000+', en: 'Approx. USD 35+' }, tags: [{ zh: '花卉', en: 'Floral', h: true }, { zh: '時序', en: 'Seasonal', h: false }, { zh: '自由發揮', en: 'Artist Freedom', h: true }] },
       { src: BASE+'pixel_01.jpg', commissioner: 'Anonymous', piecePrice: { zh: 'NTD 450', en: 'USD 15' }, tags: [{ zh: '名片點陣', en: 'Name Card Pixel', h: true }, { zh: '自由發揮', en: 'Artist Freedom', h: true }] },
       { src: BASE+'pixel_02.jpg', commissioner: 'Anonymous', piecePrice: { zh: 'NTD 450', en: 'USD 15' }, tags: [{ zh: '紋樣點陣', en: 'Pattern Pixel', h: true }, { zh: '自由發揮', en: 'Artist Freedom', h: true }] },
       { src: BASE+'pixel_03.jpg', commissioner: 'Anonymous', piecePrice: { zh: 'NTD 450', en: 'USD 15' }, tags: [{ zh: '卡牌點陣', en: 'Card Pixel', h: true }, { zh: '自由發揮', en: 'Artist Freedom', h: true }] },
@@ -419,17 +420,19 @@ function render() {
   ).join('');
 }
 
-const lightbox = document.getElementById('lightbox');
 function openLightbox() {
+  const lightbox = document.getElementById('lightbox');
   document.getElementById('lightboxImg').src = categories[currentCategory].images[currentIndex].src;
   lightbox.classList.add('open');
 }
 
 function closeLightbox() {
+  const lightbox = document.getElementById('lightbox');
   lightbox.classList.remove('open');
 }
 
 document.addEventListener('keydown', (e) => {
+  const lightbox = document.getElementById('lightbox');
   if (lightbox.classList.contains('open')) {
     if (e.key === 'Escape') closeLightbox();
     if (e.key === 'ArrowLeft') {
