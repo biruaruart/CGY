@@ -1,0 +1,450 @@
+<!DOCTYPE html>
+<html lang="zh-TW">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Biru Gallery - Commission</title>
+<style>
+  @import url('https://fonts.googleapis.com/css2?family=Cinzel:wght@400;600&family=Noto+Sans+TC:wght@300;400;500&display=swap');
+
+  :root {
+    --bg: #0a0f0e;
+    --surface: #111a18;
+    --surface2: #182420;
+    --border: #1e3330;
+    --accent: #2dd4bf;
+    --accent2: #e8633a;
+    --text: #e0f2f0;
+    --text-dim: #6b9e98;
+  }
+
+  * { box-sizing: border-box; margin: 0; padding: 0; }
+
+  body {
+    background: var(--bg);
+    color: var(--text);
+    font-family: 'Noto Sans TC', sans-serif;
+    min-height: 100vh;
+    padding: 24px 20px;
+    position: relative;
+  }
+
+  /* ── 雙語切換按鈕 ── */
+  .lang-toggle {
+    position: absolute;
+    top: 24px; right: 20px;
+    background: var(--surface);
+    border: 1px solid var(--accent);
+    color: var(--accent);
+    padding: 4px 12px;
+    font-size: 11px;
+    font-family: 'Cinzel', 'Noto Sans TC', sans-serif;
+    letter-spacing: 0.1em;
+    cursor: pointer;
+    transition: all 0.2s;
+    z-index: 10;
+  }
+  .lang-toggle:hover { background: rgba(45,212,191,0.1); }
+
+  /* ── 分類頁籤 ── */
+  .tabs {
+    display: flex;
+    gap: 6px;
+    margin-bottom: 20px;
+    flex-wrap: wrap;
+    max-width: calc(100% - 80px);
+  }
+
+  .tab-btn {
+    background: var(--surface);
+    border: 1px solid var(--border);
+    color: var(--text-dim);
+    padding: 6px 16px;
+    font-size: 12px;
+    font-family: 'Noto Sans TC', sans-serif;
+    letter-spacing: 0.08em;
+    cursor: pointer;
+    transition: all 0.2s;
+    clip-path: polygon(8px 0%, 100% 0%, calc(100% - 8px) 100%, 0% 100%);
+  }
+
+  .tab-btn:hover { border-color: var(--accent); color: var(--accent); }
+  .tab-btn.active { background: linear-gradient(135deg, #0d3d36, #1a2e20); border-color: var(--accent); color: var(--accent); }
+
+  /* ── 主體區 ── */
+  .viewer { display: grid; grid-template-columns: 1fr 280px; grid-template-rows: auto auto; gap: 12px; }
+
+  .main-image-wrap {
+    grid-column: 1; grid-row: 1; position: relative;
+    background: var(--surface); border: 1px solid var(--border);
+    aspect-ratio: 1 / 1; overflow: hidden; cursor: zoom-in;
+  }
+  .main-image-wrap::before {
+    content: ''; position: absolute; inset: 0;
+    background: linear-gradient(135deg, transparent 60%, rgba(45,212,191,0.06));
+    z-index: 1; pointer-events: none;
+  }
+  .corner { position: absolute; width: 14px; height: 14px; border-color: var(--accent); border-style: solid; z-index: 2; opacity: 0.6; }
+  .corner.tl { top: 8px; left: 8px; border-width: 1px 0 0 1px; }
+  .corner.tr { top: 8px; right: 8px; border-width: 1px 1px 0 0; }
+  .corner.bl { bottom: 8px; left: 8px; border-width: 0 0 1px 1px; }
+  .corner.br { bottom: 8px; right: 8px; border-width: 0 1px 1px 0; }
+
+  .main-image-wrap img {
+    width: 100%; height: 100%; object-fit: cover; display: block;
+    transition: transform 0.4s ease, opacity 0.3s ease;
+  }
+  .main-image-wrap:hover img { transform: scale(1.02); }
+
+  .zoom-hint {
+    position: absolute; bottom: 10px; right: 10px;
+    background: rgba(0,0,0,0.6); border: 1px solid var(--border);
+    color: var(--text-dim); font-size: 10px; padding: 3px 8px; letter-spacing: 0.1em; z-index: 2;
+  }
+
+  .nav-btn {
+    position: absolute; top: 50%; transform: translateY(-50%);
+    background: rgba(0,0,0,0.45); border: 1px solid var(--border);
+    color: var(--text-dim); width: 28px; height: 48px;
+    display: flex; align-items: center; justify-content: center;
+    cursor: pointer; z-index: 3; transition: all 0.2s; font-size: 14px; user-select: none;
+  }
+  .nav-btn:hover { background: rgba(45,212,191,0.15); border-color: var(--accent); color: var(--accent); }
+  .nav-btn.prev { left: 0; } .nav-btn.next { right: 0; }
+  .nav-btn.hidden { opacity: 0; pointer-events: none; }
+
+  .info-panel {
+    grid-column: 2; grid-row: 1; background: var(--surface);
+    border: 1px solid var(--border); padding: 20px;
+    display: flex; flex-direction: column; gap: 14px; position: relative; overflow: hidden;
+  }
+  .info-panel::after {
+    content: ''; position: absolute; top: 0; left: 0; width: 2px; height: 100%;
+    background: linear-gradient(to bottom, var(--accent), transparent);
+  }
+
+  .info-category { font-size: 10px; letter-spacing: 0.2em; color: var(--accent); text-transform: uppercase; }
+  .info-title { font-family: 'Cinzel', serif; font-size: 16px; font-weight: 600; color: var(--text); line-height: 1.4; border-bottom: 1px solid var(--border); padding-bottom: 12px; }
+  .info-price { display: flex; flex-direction: column; gap: 6px; }
+  .price-label { font-size: 10px; color: var(--text-dim); letter-spacing: 0.15em; }
+  .price-value { font-size: 18px; color: var(--accent2); font-weight: 500; }
+  .info-desc { font-size: 12px; color: var(--text-dim); line-height: 1.7; border-top: 1px solid var(--border); padding-top: 12px; white-space: pre-line; }
+
+  /* 單圖專屬資訊區塊 */
+  .piece-info-box {
+    margin-top: auto; padding: 12px; background: rgba(0,0,0,0.2);
+    border: 1px dashed var(--border); border-radius: 4px; display: flex; flex-direction: column; gap: 8px;
+  }
+  .piece-header { font-size: 10px; color: var(--accent); letter-spacing: 0.1em; margin-bottom: 4px; }
+  .piece-detail { font-size: 11px; color: var(--text); display: flex; justify-content: space-between; align-items: center;}
+  .piece-detail span.label { color: var(--text-dim); }
+  .piece-detail span.value { color: var(--accent2); font-weight: 500; text-align: right;}
+  
+  .info-tags { display: flex; flex-wrap: wrap; gap: 6px; margin-top: 4px; }
+  .tag { font-size: 10px; padding: 3px 8px; border: 1px solid var(--border); color: var(--text-dim); letter-spacing: 0.08em; background: var(--bg); }
+  .tag.highlight { border-color: var(--accent); color: var(--accent); }
+
+  /* 縮圖列 */
+  .thumbnails { grid-column: 1; grid-row: 2; display: flex; gap: 8px; flex-wrap: wrap; }
+  .thumb { width: 64px; height: 64px; border: 1px solid var(--border); overflow: hidden; cursor: pointer; position: relative; flex-shrink: 0; transition: border-color 0.2s; }
+  .thumb img { width: 100%; height: 100%; object-fit: cover; display: block; transition: transform 0.3s; filter: brightness(0.5); }
+  .thumb:hover img { transform: scale(1.08); filter: brightness(0.8); }
+  .thumb.active { border-color: var(--accent); }
+  .thumb.active img { filter: brightness(1); }
+  .thumb.active::after { content: ''; position: absolute; inset: 0; border: 2px solid var(--accent); pointer-events: none; }
+
+  /* Lightbox */
+  .lightbox { display: none; position: fixed; inset: 0; background: rgba(0,0,0,0.92); z-index: 100; align-items: center; justify-content: center; cursor: zoom-out; }
+  .lightbox.open { display: flex; }
+  .lightbox img { max-width: 90vw; max-height: 90vh; object-fit: contain; border: 1px solid var(--border); box-shadow: 0 0 30px rgba(0,0,0,0.8); }
+  .lightbox-close { position: fixed; top: 20px; right: 24px; font-size: 24px; color: var(--text-dim); cursor: pointer; z-index: 101; transition: color 0.2s; }
+  .lightbox-close:hover { color: var(--accent); }
+  .lightbox-hint { position: fixed; bottom: 20px; color: var(--text-dim); font-size: 11px; letter-spacing: 0.1em; pointer-events: none; }
+
+  @media (max-width: 640px) {
+    .viewer { grid-template-columns: 1fr; }
+    .info-panel { grid-column: 1; grid-row: 2; }
+    .thumbnails { grid-row: 3; }
+    .tabs { max-width: 100%; margin-top: 36px; }
+    .lang-toggle { top: 12px; right: 12px; }
+  }
+</style>
+</head>
+<body>
+
+<button class="lang-toggle" onclick="toggleLang()" id="langBtn">EN / 中文</button>
+
+<div class="tabs" id="tabsContainer"></div>
+
+<div class="viewer">
+  <div class="main-image-wrap">
+    <div class="corner tl"></div><div class="corner tr"></div><div class="corner bl"></div><div class="corner br"></div>
+    <div class="nav-btn prev" id="prevBtn" onclick="navigate(-1)">‹</div>
+    <img id="mainImg" src="" alt="Main Image" onclick="openLightbox()">
+    <div class="nav-btn next" id="nextBtn" onclick="navigate(1)">›</div>
+    <div class="zoom-hint" id="zoomHint">CLICK TO ZOOM</div>
+  </div>
+
+  <div class="info-panel">
+    <div class="info-category" id="infoCategory"></div>
+    <div class="info-title" id="infoTitle"></div>
+    <div class="info-price">
+      <div class="price-label">BASE PRICE / 底價</div>
+      <div class="price-value" id="infoPrice"></div>
+    </div>
+    <div class="info-desc" id="infoDesc"></div>
+    
+    <div class="piece-info-box">
+      <div class="piece-header" id="pieceHeader">ABOUT THIS PIECE</div>
+      <div class="piece-detail" id="pieceClientBox">
+        <span class="label" id="clientLabel">Client</span>
+        <span class="value" id="pieceClient"></span>
+      </div>
+      <div class="piece-detail" id="piecePriceBox">
+        <span class="label" id="piecePriceLabel">Ref. Price</span>
+        <span class="value" id="piecePrice"></span>
+      </div>
+      <div class="info-tags" id="infoTags"></div>
+    </div>
+  </div>
+
+  <div class="thumbnails" id="thumbnails"></div>
+</div>
+
+<div class="lightbox" id="lightbox" onclick="closeLightbox()">
+  <div class="lightbox-close" onclick="closeLightbox()">✕</div>
+  <img id="lightboxImg" src="" alt="Full Image" onclick="event.stopPropagation()">
+  <div class="lightbox-hint" id="lbHint">Use ← → keys to navigate / ESC to close</div>
+</div>
+
+<script>
+const BASE = 'https://biruaruart.github.io/CGY/';
+let currentLang = 'zh';
+
+const categories = {
+  illustration: {
+    tab: { zh: '插畫委託', en: 'Illustration' },
+    label: { zh: 'ILLUSTRATION', en: 'ILLUSTRATION' },
+    title: { zh: '幻想印象派', en: 'Fantasia Impressionism' },
+    price: { zh: 'NTD 1,000~ ↑', en: 'USD 50~ ↑' },
+    desc: { 
+      zh: '厚塗油畫感插畫，色彩豐富，偏灰調。\n◆ 作畫時間：約 3 週～1 個月。', 
+      en: 'Painterly style with rich, slightly muted colors.\n◆ Est. time: approx. 3 weeks ~ 1 month.' 
+    },
+    images: [
+      { src: BASE+'ill_01.jpg', commissioner: 'Anonymous', piecePrice: { zh: '約 NTD 1,000+', en: 'Approx. USD 50+' }, tags: [{ zh: '胸像', en: 'Bust', h: true }, { zh: '委託', en: 'Commission', h: false }, { zh: '自由發揮', en: 'Artist Freedom', h: true }] },
+      { src: BASE+'ill_02.jpg', commissioner: 'Anonymous', piecePrice: { zh: '約 NTD 1,500+', en: 'Approx. USD 75+' }, tags: [{ zh: '半身', en: 'Half-body', h: true }, { zh: '委託', en: 'Commission', h: false }, { zh: '自由發揮', en: 'Artist Freedom', h: true }] },
+      { src: BASE+'ill_03.png', commissioner: 'Anonymous', piecePrice: { zh: '約 NTD 1,500+', en: 'Approx. USD 75+' }, tags: [{ zh: '半身', en: 'Half-body', h: true }, { zh: '噗幣轉蛋 / 委託', en: 'Plurk Gacha', h: false }, { zh: '自由發揮', en: 'Artist Freedom', h: true }] },
+      { src: BASE+'ill_04.jpg', commissioner: 'Anonymous (FF14)', piecePrice: { zh: '約 NTD 1,000+', en: 'Approx. USD 50+' }, tags: [{ zh: '胸像', en: 'Bust', h: true }, { zh: '委託', en: 'FF14', h: false }, { zh: '自由發揮', en: 'Artist Freedom', h: true }] },
+      { src: BASE+'ill_05.jpg', commissioner: 'Anonymous (FF14)', piecePrice: { zh: '約 NTD 1,000+', en: 'Approx. USD 50+' }, tags: [{ zh: '頭像', en: 'Headshot', h: true }, { zh: '委託', en: 'FF14', h: false }, { zh: '自由發揮', en: 'Artist Freedom', h: true }] },
+      { src: BASE+'ill_06.jpg', commissioner: 'Anonymous', piecePrice: { zh: '約 NTD 1,500+', en: 'Approx. USD 75+' }, tags: [{ zh: '半身', en: 'Half-body', h: true }, { zh: '委託', en: 'Commission', h: false }, { zh: '自由發揮', en: 'Artist Freedom', h: true }] }
+    ]
+  },
+  light: {
+    tab: { zh: '小品委託', en: 'Light Illust' },
+    label: { zh: 'LIGHT ILLUST', en: 'LIGHT ILLUST' },
+    title: { zh: '小品插畫', en: 'Light Illustration' },
+    price: { zh: 'NTD 700~ ↑', en: 'USD 25~ ↑' },
+    desc: { 
+      zh: '有構圖、氛圍，筆觸偏油畫。完成度較高的輕量委託。\n可給主題或元素，其餘由畫師發揮。\n◆ 作畫時間：約 2～3 週。', 
+      en: 'Atmospheric painterly style. You may suggest a theme; the rest is up to the artist.\n◆ Est. time: approx. 2~3 weeks.' 
+    },
+    images: [
+      { src: BASE+'light_01.jpg', commissioner: 'Anonymous', piecePrice: { zh: '約 NTD 800+', en: 'Approx. USD 30+' }, tags: [{ zh: '至胸', en: 'Chest-up', h: true }, { zh: '氛圍感', en: 'Atmosphere', h: false }, { zh: '自由發揮', en: 'Artist Freedom', h: true }] },
+      { src: BASE+'light_02.jpg', commissioner: 'Anonymous', piecePrice: { zh: '約 NTD 950+', en: 'Approx. USD 35+' }, tags: [{ zh: '半身', en: 'Half-body', h: true }, { zh: '氛圍感', en: 'Atmosphere', h: false }, { zh: '自由發揮', en: 'Artist Freedom', h: true }] },
+      { src: BASE+'light_03.jpg', commissioner: 'Anonymous', piecePrice: { zh: '約 NTD 700+', en: 'Approx. USD 25+' }, tags: [{ zh: '頭像', en: 'Headshot', h: true }, { zh: '氛圍感', en: 'Atmosphere', h: false }, { zh: '自由發揮', en: 'Artist Freedom', h: true }] },
+      { src: BASE+'light_04.jpg', commissioner: 'Anonymous', piecePrice: { zh: '約 NTD 950+', en: 'Approx. USD 35+' }, tags: [{ zh: '半身', en: 'Half-body', h: true }, { zh: '氛圍感', en: 'Atmosphere', h: false }, { zh: '自由發揮', en: 'Artist Freedom', h: true }] },
+      { src: BASE+'light_05.jpg', commissioner: 'Anonymous', piecePrice: { zh: '約 NTD 800+', en: 'Approx. USD 30+' }, tags: [{ zh: '至胸', en: 'Chest-up', h: true }, { zh: '氛圍感', en: 'Atmosphere', h: false }, { zh: '自由發揮', en: 'Artist Freedom', h: true }] }
+    ]
+  },
+  doodle: {
+    tab: { zh: '塗鴉', en: 'Doodle' },
+    label: { zh: 'DOODLE', en: 'DOODLE' },
+    title: { zh: '塗鴉', en: 'Doodle' },
+    price: { zh: 'NTD 500~ ↑', en: 'USD 18~ ↑' },
+    desc: { 
+      zh: '筆觸明顯、較色塊感，依照設定給我的心理感受繪製。\n◆ 作畫時間：約 1～2 週。', 
+      en: 'Bold brushwork with a loose, expressive feel. Drawn based on artist impression.\n◆ Est. time: approx. 1~2 weeks.' 
+    },
+    images: [
+      { src: BASE+'doo_01.jpg', commissioner: 'Anonymous', piecePrice: { zh: '約 NTD 500+', en: 'Approx. USD 18+' }, tags: [{ zh: '頭像/胸像', en: 'Headshot/Bust', h: true }, { zh: '自由發揮', en: 'Artist Freedom', h: true }] },
+      { src: BASE+'doo_02.jpg', commissioner: 'Anonymous', piecePrice: { zh: '約 NTD 500+', en: 'Approx. USD 18+' }, tags: [{ zh: '頭像/胸像', en: 'Headshot/Bust', h: true }, { zh: '自由發揮', en: 'Artist Freedom', h: true }] },
+      { src: BASE+'doo_03.jpg', commissioner: 'Anonymous', piecePrice: { zh: '約 NTD 500+', en: 'Approx. USD 18+' }, tags: [{ zh: '頭像/胸像', en: 'Headshot/Bust', h: true }, { zh: '自由發揮', en: 'Artist Freedom', h: true }] }
+    ]
+  },
+  surprise: {
+    tab: { zh: '驚喜包', en: 'Surprise Box' },
+    label: { zh: 'SURPRISE BOX', en: 'SURPRISE BOX' },
+    title: { zh: '各類驚喜包', en: 'Various Surprise Boxes' },
+    price: { zh: 'NTD 450~ ↑', en: 'USD 15~ ↑' },
+    desc: { 
+      zh: '包含新藝術(NTD 1,500+)、花卉(NTD 1,000+)、點陣(NTD 450)等。\n無需自選構圖，由畫師為您的角色完全自由設計！\n◆ 作畫時間：約 2 週～1 個月。', 
+      en: 'Includes Art Nouveau($55+), Floral($35+), Pixel($15), etc.\nNo need to choose framing! Artist will design freely.\n◆ Est. time: approx. 2 weeks ~ 1 month.' 
+    },
+    images: [
+      { src: BASE+'sur_01.png', commissioner: 'Anonymous', piecePrice: { zh: '約 NTD 1,500+', en: 'Approx. USD 55+' }, tags: [{ zh: '全身', en: 'Full-body', h: true }, { zh: '新藝術風', en: 'Art Nouveau', h: false }, { zh: '自由發揮', en: 'Artist Freedom', h: true }] },
+      { src: BASE+'sur_02.png', commissioner: 'Anonymous', piecePrice: { zh: '約 NTD 1,500+', en: 'Approx. USD 55+' }, tags: [{ zh: '半身', en: 'Half-body', h: true }, { zh: '新藝術風', en: 'Art Nouveau', h: false }, { zh: '自由發揮', en: 'Artist Freedom', h: true }] },
+      { src: BASE+'surf_01.png', commissioner: 'Anonymous', piecePrice: { zh: '約 NTD 1,000+', en: 'Approx. USD 35+' }, tags: [{ zh: '花卉', en: 'Floral', h: true }, { zh: '時序', en: 'Seasonal', h: false }, { zh: '自由發揮', en: 'Artist Freedom', h: true }] },
+      { src: BASE+'surf_02.png', commissioner: 'Anonymous', piecePrice: { zh: '約 NTD 1,000+', en: 'Approx. USD 35+' }, tags: [{ zh: '花卉', en: 'Floral', h: true }, { zh: '時序', en: 'Seasonal', h: false }, { zh: '自由發揮', en: 'Artist Freedom', h: true }] },
+      { src: BASE+'surf_03.png', commissioner: 'Anonymous', piecePrice: { zh: '約 NTD 1,000+', en: 'Approx. USD 35+' }, tags: [{ zh: '花卉', en: 'Floral', h: true }, { zh: '時序', en: 'Seasonal', h: false }, { zh: '自由發揮', en: 'Artist Freedom', h: true }] },
+      { src: BASE+'surf_04.png', commissioner: 'Anonymous', piecePrice: { zh: '約 NTD 1,000+', en: 'Approx. USD 35+' }, tags: [{ zh: '花卉', en: 'Floral', h: true }, { zh: '時序', en: 'Seasonal', h: false }, { zh: '自由發揮', en: 'Artist Freedom', h: true }] },
+      { src: BASE+'pixel_01.jpg', commissioner: 'Anonymous', piecePrice: { zh: 'NTD 450', en: 'USD 15' }, tags: [{ zh: '名片點陣', en: 'Name Card Pixel', h: true }, { zh: '自由發揮', en: 'Artist Freedom', h: true }] },
+      { src: BASE+'pixel_02.jpg', commissioner: 'Anonymous', piecePrice: { zh: 'NTD 450', en: 'USD 15' }, tags: [{ zh: '紋樣點陣', en: 'Pattern Pixel', h: true }, { zh: '自由發揮', en: 'Artist Freedom', h: true }] },
+      { src: BASE+'pixel_03.jpg', commissioner: 'Anonymous', piecePrice: { zh: 'NTD 450', en: 'USD 15' }, tags: [{ zh: '卡牌點陣', en: 'Card Pixel', h: true }, { zh: '自由發揮', en: 'Artist Freedom', h: true }] },
+      { src: BASE+'pixel_04.jpg', commissioner: 'Anonymous', piecePrice: { zh: 'NTD 450', en: 'USD 15' }, tags: [{ zh: '卡牌點陣', en: 'Card Pixel', h: true }, { zh: '自由發揮', en: 'Artist Freedom', h: true }] }
+    ]
+  },
+  others: {
+    tab: { zh: '其他項目', en: 'Others' },
+    label: { zh: 'OTHERS', en: 'OTHERS' },
+    title: { zh: '角色設計 / Q版 / 線稿', en: 'Chara Design / Chibi / Lineart' },
+    price: { zh: '依項目而定', en: 'Varies by type' },
+    desc: { 
+      zh: '包含角色設定圖(NTD 3,000+)、Q 版插畫(NTD 600+)、純線稿單色委託(NTD 300+)。', 
+      en: 'Includes character design sheets($100+), Chibi($22+), or clean lineart($12+).' 
+    },
+    images: [
+      { src: BASE+'charaD_01.jpg', commissioner: 'Anonymous', piecePrice: { zh: '約 NTD 3,000+', en: 'Approx. USD 100+' }, tags: [{ zh: '角色設計', en: 'Design Sheet', h: true }, { zh: '設定包', en: 'Settings Pkg', h: false }, { zh: '自由發揮', en: 'Artist Freedom', h: true }] },
+      { src: BASE+'chibi_01.jpg', commissioner: 'Anonymous', piecePrice: { zh: '約 NTD 1,000+', en: 'Approx. USD 35+' }, tags: [{ zh: 'Q版雙人', en: 'Chibi 2-chars', h: true }, { zh: 'FF14', en: 'FF14', h: false }, { zh: '自由發揮', en: 'Artist Freedom', h: true }] },
+      { src: BASE+'chibi_02.jpg', commissioner: 'Anonymous', piecePrice: { zh: '約 NTD 600+', en: 'Approx. USD 22+' }, tags: [{ zh: 'Q版單人', en: 'Chibi 1-char', h: true }, { zh: 'FF14', en: 'FF14', h: false }, { zh: '自由發揮', en: 'Artist Freedom', h: true }] },
+      { src: BASE+'chibi_03.jpg', commissioner: 'Anonymous', piecePrice: { zh: '約 NTD 600+', en: 'Approx. USD 22+' }, tags: [{ zh: 'Q版單人', en: 'Chibi 1-char', h: true }, { zh: '進巨', en: 'SnK', h: false }, { zh: '自由發揮', en: 'Artist Freedom', h: true }] },
+      { src: BASE+'chibi_04.jpg', commissioner: 'Anonymous', piecePrice: { zh: '約 NTD 1,000+', en: 'Approx. USD 35+' }, tags: [{ zh: 'Q版雙人', en: 'Chibi 2-chars', h: true }, { zh: '寶可夢', en: 'Pokémon', h: false }, { zh: '自由發揮', en: 'Artist Freedom', h: true }] },
+      { src: BASE+'chibi_05.jpg', commissioner: 'Anonymous', piecePrice: { zh: '約 NTD 1,000+', en: 'Approx. USD 35+' }, tags: [{ zh: 'Q版雙人', en: 'Chibi 2-chars', h: true }, { zh: '自由發揮', en: 'Artist Freedom', h: true }] },
+      { src: BASE+'chibi_06.jpg', commissioner: 'Anonymous', piecePrice: { zh: '約 NTD 1,000+', en: 'Approx. USD 35+' }, tags: [{ zh: 'Q版雙人', en: 'Chibi 2-chars', h: true }, { zh: '自由發揮', en: 'Artist Freedom', h: true }] },
+      { src: BASE+'lineA_01.jpg', commissioner: 'Anonymous', piecePrice: { zh: '約 NTD 300+', en: 'Approx. USD 12+' }, tags: [{ zh: '線稿胸像', en: 'Lineart Bust', h: true }, { zh: '表情', en: 'Expression', h: false }, { zh: '自由發揮', en: 'Artist Freedom', h: true }] }
+    ]
+  }
+};
+
+function updateStaticUI() {
+  document.getElementById('langBtn').textContent = currentLang === 'zh' ? 'EN 版' : '中文版';
+  document.getElementById('zoomHint').textContent = currentLang === 'zh' ? '點擊放大' : 'CLICK TO ZOOM';
+  document.getElementById('pieceHeader').textContent = currentLang === 'zh' ? '🖼️ 此圖資訊' : '🖼️ ABOUT THIS PIECE';
+  document.getElementById('clientLabel').textContent = currentLang === 'zh' ? '委託人' : 'Client';
+  document.getElementById('piecePriceLabel').textContent = currentLang === 'zh' ? '此圖參考價' : 'Ref. Price';
+  document.getElementById('lbHint').textContent = currentLang === 'zh' ? '使用鍵盤 ← → 切換，ESC 關閉' : 'Use ← → keys to navigate / ESC to close';
+}
+
+function buildTabs() {
+  const container = document.getElementById('tabsContainer');
+  container.innerHTML = '';
+  Object.keys(categories).forEach(key => {
+    const btn = document.createElement('button');
+    btn.className = `tab-btn ${key === currentCategory ? 'active' : ''}`;
+    btn.textContent = categories[key].tab[currentLang];
+    btn.onclick = () => switchCategory(key);
+    container.appendChild(btn);
+  });
+}
+
+function switchCategory(cat) {
+  currentCategory = cat;
+  currentIndex = 0;
+  buildTabs();
+  render();
+}
+
+function navigate(dir) {
+  const imgs = categories[currentCategory].images;
+  currentIndex = (currentIndex + dir + imgs.length) % imgs.length;
+  const mainImg = document.getElementById('mainImg');
+  mainImg.style.opacity = 0;
+  setTimeout(() => {
+    render();
+    mainImg.style.opacity = 1;
+  }, 200);
+}
+
+function selectThumb(i) {
+  currentIndex = i;
+  const mainImg = document.getElementById('mainImg');
+  mainImg.style.opacity = 0;
+  setTimeout(() => { render(); mainImg.style.opacity = 1; }, 200);
+}
+
+function toggleLang() {
+  currentLang = currentLang === 'zh' ? 'en' : 'zh';
+  updateStaticUI();
+  buildTabs();
+  render();
+}
+
+function render() {
+  const data = categories[currentCategory];
+  const imgs = data.images;
+  const current = imgs[currentIndex];
+
+  if(!current) return;
+
+  document.getElementById('mainImg').src = current.src;
+  document.getElementById('infoCategory').textContent = data.label[currentLang];
+  document.getElementById('infoTitle').textContent = data.title[currentLang];
+  document.getElementById('infoPrice').textContent = data.price[currentLang];
+  document.getElementById('infoDesc').textContent = data.desc[currentLang];
+
+  const cBox = document.getElementById('pieceClientBox');
+  if (current.commissioner) {
+    cBox.style.display = 'flex';
+    document.getElementById('pieceClient').textContent = current.commissioner;
+  } else {
+    cBox.style.display = 'none';
+  }
+
+  const pBox = document.getElementById('piecePriceBox');
+  if (current.piecePrice) {
+    pBox.style.display = 'flex';
+    document.getElementById('piecePrice').textContent = current.piecePrice[currentLang];
+  } else {
+    pBox.style.display = 'none';
+  }
+
+  const tagsEl = document.getElementById('infoTags');
+  if (current.tags) {
+    tagsEl.innerHTML = current.tags.map(t => 
+      `<span class="tag ${t.h ? 'highlight' : ''}">${t[currentLang]}</span>`
+    ).join('');
+  } else {
+    tagsEl.innerHTML = '';
+  }
+
+  document.getElementById('prevBtn').classList.toggle('hidden', imgs.length <= 1);
+  document.getElementById('nextBtn').classList.toggle('hidden', imgs.length <= 1);
+
+  const thumbsEl = document.getElementById('thumbnails');
+  thumbsEl.innerHTML = imgs.map((img, i) => 
+    `<div class="thumb ${i === currentIndex ? 'active' : ''}" onclick="selectThumb(${i})">
+      <img src="${img.src}" alt="Thumb">
+    </div>`
+  ).join('');
+}
+
+const lightbox = document.getElementById('lightbox');
+function openLightbox() {
+  document.getElementById('lightboxImg').src = categories[currentCategory].images[currentIndex].src;
+  lightbox.classList.add('open');
+}
+
+function closeLightbox() {
+  lightbox.classList.remove('open');
+}
+
+document.addEventListener('keydown', (e) => {
+  if (lightbox.classList.contains('open')) {
+    if (e.key === 'Escape') closeLightbox();
+    if (e.key === 'ArrowLeft') {
+      navigate(-1);
+      document.getElementById('lightboxImg').src = categories[currentCategory].images[currentIndex].src;
+    }
+    if (e.key === 'ArrowRight') {
+      navigate(1);
+      document.getElementById('lightboxImg').src = categories[currentCategory].images[currentIndex].src;
+    }
+  }
+});
+
+updateStaticUI();
+buildTabs();
+render();
+</script>
+</body>
+</html>
