@@ -1,0 +1,451 @@
+<!DOCTYPE html>
+<html lang="zh-TW">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Biru — Commission Calculator</title>
+<style>
+  @import url('https://fonts.googleapis.com/css2?family=Cinzel:wght@400;600&family=Noto+Sans+TC:wght@300;400;500&display=swap');
+
+  :root {
+    --bg: #0a0f0e;
+    --surface: #111a18;
+    --surface2: #182420;
+    --border: #1e3330;
+    --accent: #2dd4bf;
+    --accent2: #e8633a;
+    --text: #e0f2f0;
+    --text-dim: #6b9e98;
+  }
+
+  * { box-sizing: border-box; margin: 0; padding: 0; }
+
+  body {
+    background: var(--bg);
+    color: var(--text);
+    font-family: 'Noto Sans TC', sans-serif;
+    min-height: 100vh;
+    padding: 40px 24px 80px;
+    max-width: 760px;
+    margin: 0 auto;
+    position: relative;
+  }
+
+  /* ── 雙語切換邏輯 ── */
+  body.en-mode .lang-zh { display: none !important; }
+  body:not(.en-mode) .lang-en { display: none !important; }
+
+  /* 切換按鈕 */
+  .lang-toggle {
+    position: absolute;
+    top: 20px; right: 24px;
+    background: var(--surface);
+    border: 1px solid var(--accent);
+    color: var(--accent);
+    padding: 4px 12px;
+    font-size: 11px;
+    font-family: 'Cinzel', 'Noto Sans TC', sans-serif;
+    letter-spacing: 0.1em;
+    cursor: pointer;
+    transition: all 0.2s;
+    z-index: 100;
+  }
+  .lang-toggle:hover { background: rgba(45,212,191,0.1); }
+
+  .header {
+    margin-bottom: 36px;
+    padding-bottom: 20px;
+    border-bottom: 1px solid var(--border);
+    padding-top: 10px;
+  }
+  .header-label { font-size: 10px; letter-spacing: 0.3em; color: var(--accent); text-transform: uppercase; margin-bottom: 8px; }
+  .header-title { font-family: 'Cinzel', serif; font-size: 22px; font-weight: 600; color: var(--text); }
+  .header-sub { font-size: 12px; color: var(--text-dim); margin-top: 6px; line-height: 1.7; }
+
+  /* ── 漸進式 UI (Step-by-step) ── */
+  .step-section {
+    margin-bottom: 32px;
+    opacity: 0.4;
+    pointer-events: none;
+    transition: all 0.4s ease;
+    transform: translateY(10px);
+  }
+  .step-section.active {
+    opacity: 1;
+    pointer-events: auto;
+    transform: translateY(0);
+  }
+
+  .section-title {
+    font-size: 11px; letter-spacing: 0.2em; color: var(--accent);
+    text-transform: uppercase; margin-bottom: 16px;
+    display: flex; align-items: center; gap: 12px;
+  }
+  .section-title span.step-badge {
+    background: var(--accent); color: var(--bg);
+    padding: 2px 8px; font-weight: 600; border-radius: 2px;
+  }
+  .section-title::after { content: ''; flex: 1; height: 1px; background: var(--border); }
+
+  /* ── 選項網格 ── */
+  .option-grid { display: grid; grid-template-columns: repeat(auto-fill, minmax(160px, 1fr)); gap: 10px; }
+  .option-grid.wide { grid-template-columns: repeat(auto-fill, minmax(220px, 1fr)); }
+
+  .opt { position: relative; cursor: pointer; }
+  .opt input { position: absolute; opacity: 0; width: 0; height: 0; }
+  .opt-label {
+    display: flex; flex-direction: column; gap: 6px;
+    padding: 14px 16px; background: var(--surface);
+    border: 1px solid var(--border); transition: all 0.2s; user-select: none;
+    height: 100%;
+  }
+  .opt-label:hover { border-color: var(--text-dim); }
+  
+  .opt.radio input:checked + .opt-label { background: rgba(45,212,191,0.08); border-color: var(--accent); box-shadow: inset 0 0 0 1px var(--accent); }
+  .opt.checkbox input:checked + .opt-label { background: rgba(232,99,58,0.08); border-color: var(--accent2); box-shadow: inset 0 0 0 1px var(--accent2); }
+  
+  .opt-name { font-size: 14px; color: var(--text); font-weight: 500; line-height: 1.4; }
+  .opt-price { font-size: 12px; color: var(--text-dim); font-family: 'Cinzel', serif; letter-spacing: 0.05em; margin-top: auto; }
+  
+  .opt.radio input:checked + .opt-label .opt-price { color: var(--accent); }
+  .opt.checkbox input:checked + .opt-label .opt-price { color: var(--accent2); }
+  
+  .opt-note { font-size: 10px; color: var(--text-dim); line-height: 1.5; margin-top: 4px; padding-top: 6px; border-top: 1px dashed var(--border); opacity: 0.8;}
+
+  /* 動態顯示區域 */
+  .dynamic-group { display: none; }
+  .dynamic-group.show { display: block; animation: fadeIn 0.4s ease forwards; }
+
+  @keyframes fadeIn { from { opacity: 0; transform: translateY(5px); } to { opacity: 1; transform: translateY(0); } }
+
+  /* 結果框 */
+  .result-wrap { position: sticky; bottom: 20px; margin-top: 40px; z-index: 50; }
+  .result-box { background: var(--surface); border: 1px solid var(--border); border-top: 3px solid var(--accent); padding: 24px; box-shadow: 0 10px 40px rgba(0,0,0,0.8); }
+  .result-header { display: flex; justify-content: space-between; align-items: flex-end; margin-bottom: 16px; }
+  .result-label { font-size: 11px; letter-spacing: 0.2em; color: var(--accent); text-transform: uppercase; margin-bottom: 6px; }
+  .result-price { font-family: 'Cinzel', serif; font-size: 32px; color: var(--text); font-weight: 600; letter-spacing: 0.05em; line-height: 1;}
+  
+  .result-breakdown { padding-top: 16px; border-top: 1px solid var(--border); display: flex; flex-direction: column; gap: 8px; }
+  .breakdown-row { display: flex; justify-content: space-between; font-size: 13px; color: var(--text-dim); }
+  .breakdown-row span:last-child { color: var(--text); font-family: 'Cinzel', serif; }
+  
+  .result-note { margin-top: 16px; font-size: 11px; color: var(--text-dim); line-height: 1.8; padding-top: 16px; border-top: 1px dashed var(--border); }
+  .result-note strong { color: var(--accent2); }
+
+  @media (max-width: 480px) {
+    .option-grid { grid-template-columns: 1fr 1fr; }
+    .option-grid.wide { grid-template-columns: 1fr; }
+    .result-price { font-size: 26px; }
+    .lang-toggle { top: 12px; right: 12px; }
+  }
+</style>
+</head>
+<body>
+
+<button class="lang-toggle" onclick="toggleLang()" id="langBtn">EN / 中文</button>
+
+<div class="header">
+  <div class="header-label">Biru / ビル</div>
+  <div class="header-title">
+    <span class="lang-zh">委託價格試算表</span>
+    <span class="lang-en">Price Calculator</span>
+  </div>
+  <div class="header-sub">
+    <span class="lang-zh">請依照步驟選擇您的委託項目。此試算僅供初步預算參考，最終報價將依複雜度與來信討論為準。</span>
+    <span class="lang-en">Follow the steps to get an estimate. This is for reference only; final pricing depends on complexity.</span>
+  </div>
+</div>
+
+<div class="step-section active" id="step1">
+  <div class="section-title"><span class="step-badge">1</span> <span class="lang-zh">選擇委託風格</span><span class="lang-en">Select Style</span></div>
+  <div class="option-grid wide">
+    
+    <label class="opt radio"><input type="radio" name="category" value="detailed">
+      <div class="opt-label">
+        <span class="opt-name"><span class="lang-zh">精緻插畫</span><span class="lang-en">Detailed Illustration</span></span>
+        <span class="opt-note"><span class="lang-zh">精細完稿，提供完整場景透視加選</span><span class="lang-en">Highly detailed finish, optional full background perspective.</span></span>
+      </div>
+    </label>
+
+    <label class="opt radio"><input type="radio" name="category" value="simple">
+      <div class="opt-label">
+        <span class="opt-name"><span class="lang-zh">小品插畫</span><span class="lang-en">Simple Illustration</span></span>
+        <span class="opt-note"><span class="lang-zh">不提供遠景加選</span><span class="lang-en">Far perspective not available.</span></span>
+      </div>
+    </label>
+
+    <label class="opt radio"><input type="radio" name="category" value="doodle">
+      <div class="opt-label">
+        <span class="opt-name"><span class="lang-zh">塗鴉委託</span><span class="lang-en">Sketch / Doodle</span></span>
+        <span class="opt-note"><span class="lang-zh">僅近景，不提供複雜背景與遠景</span><span class="lang-en">Near perspective only. No complex BG.</span></span>
+      </div>
+    </label>
+
+    <label class="opt radio"><input type="radio" name="category" value="surprise">
+      <div class="opt-label">
+        <span class="opt-name"><span class="lang-zh">驚喜包</span><span class="lang-en">Surprise Box</span></span>
+        <span class="opt-note"><span class="lang-zh">免通靈，由畫師自由發揮設計</span><span class="lang-en">Artist's total creative freedom.</span></span>
+      </div>
+    </label>
+
+    <label class="opt radio"><input type="radio" name="category" value="chibi">
+      <div class="opt-label">
+        <span class="opt-name"><span class="lang-zh">Q版插畫</span><span class="lang-en">Chibi</span></span>
+        <span class="opt-note"><span class="lang-zh">可愛的變形比例</span><span class="lang-en">Cute, stylized proportions.</span></span>
+      </div>
+    </label>
+
+    <label class="opt radio"><input type="radio" name="category" value="ref_sheet">
+      <div class="opt-label">
+        <span class="opt-name"><span class="lang-zh">角色設定圖</span><span class="lang-en">Reference Sheet</span></span>
+        <span class="opt-note"><span class="lang-zh">需提供基本外觀設定與參考圖</span><span class="lang-en">Visual references strictly required.</span></span>
+      </div>
+    </label>
+
+  </div>
+</div>
+
+<div class="step-section" id="step2">
+  <div class="section-title"><span class="step-badge">2</span> <span class="lang-zh">選擇作畫範圍 / 項目</span><span class="lang-en">Select Scope / Type</span></div>
+  
+  <div class="dynamic-group option-grid" data-group="detailed">
+    <label class="opt radio"><input type="radio" name="scope" data-zh="1500" data-en="60"><div class="opt-label"><span class="opt-name"><span class="lang-zh">頭像</span><span class="lang-en">Headshot</span></span><span class="opt-price">1500 / 60</span><span class="opt-note"><span class="lang-zh">一般為簡單色塊背景</span><span class="lang-en">Usually simple color block BG</span></span></div></label>
+    <label class="opt radio"><input type="radio" name="scope" data-zh="2200" data-en="85"><div class="opt-label"><span class="opt-name"><span class="lang-zh">胸像</span><span class="lang-en">Bust</span></span><span class="opt-price">2200 / 85</span></div></label>
+    <label class="opt radio"><input type="radio" name="scope" data-zh="3000" data-en="120"><div class="opt-label"><span class="opt-name"><span class="lang-zh">半身</span><span class="lang-en">Half-body</span></span><span class="opt-price">3000 / 120</span></div></label>
+    <label class="opt radio"><input type="radio" name="scope" data-zh="4000" data-en="160"><div class="opt-label"><span class="opt-name"><span class="lang-zh">全身：近景</span><span class="lang-en">Full-body (Near)</span></span><span class="opt-price">4000 / 160</span></div></label>
+    <label class="opt radio"><input type="radio" name="scope" data-zh="6000" data-en="250"><div class="opt-label"><span class="opt-name"><span class="lang-zh">全身：遠景</span><span class="lang-en">Full-body (Far)</span></span><span class="opt-price">6000 / 250</span><span class="opt-note"><span class="lang-zh">包含整體畫面場景透視</span><span class="lang-en">Includes full scene perspective</span></span></div></label>
+  </div>
+
+  <div class="dynamic-group option-grid" data-group="simple">
+    <label class="opt radio"><input type="radio" name="scope" data-zh="1000" data-en="40"><div class="opt-label"><span class="opt-name"><span class="lang-zh">頭像</span><span class="lang-en">Headshot</span></span><span class="opt-price">1000 / 40</span></div></label>
+    <label class="opt radio"><input type="radio" name="scope" data-zh="1500" data-en="60"><div class="opt-label"><span class="opt-name"><span class="lang-zh">胸像</span><span class="lang-en">Bust</span></span><span class="opt-price">1500 / 60</span></div></label>
+    <label class="opt radio"><input type="radio" name="scope" data-zh="2200" data-en="85"><div class="opt-label"><span class="opt-name"><span class="lang-zh">半身</span><span class="lang-en">Half-body</span></span><span class="opt-price">2200 / 85</span></div></label>
+    <label class="opt radio"><input type="radio" name="scope" data-zh="2800" data-en="110"><div class="opt-label"><span class="opt-name"><span class="lang-zh">全身：近景</span><span class="lang-en">Full-body (Near)</span></span><span class="opt-price">2800 / 110</span></div></label>
+  </div>
+
+  <div class="dynamic-group option-grid" data-group="doodle">
+    <label class="opt radio"><input type="radio" name="scope" data-zh="600" data-en="25"><div class="opt-label"><span class="opt-name"><span class="lang-zh">頭像</span><span class="lang-en">Headshot</span></span><span class="opt-price">600 / 25</span></div></label>
+    <label class="opt radio"><input type="radio" name="scope" data-zh="900" data-en="35"><div class="opt-label"><span class="opt-name"><span class="lang-zh">胸像</span><span class="lang-en">Bust</span></span><span class="opt-price">900 / 35</span></div></label>
+    <label class="opt radio"><input type="radio" name="scope" data-zh="1200" data-en="50"><div class="opt-label"><span class="opt-name"><span class="lang-zh">半身</span><span class="lang-en">Half-body</span></span><span class="opt-price">1200 / 50</span></div></label>
+    <label class="opt radio"><input type="radio" name="scope" data-zh="1800" data-en="75"><div class="opt-label"><span class="opt-name"><span class="lang-zh">全身</span><span class="lang-en">Full-body</span></span><span class="opt-price">1800 / 75</span></div></label>
+  </div>
+
+  <div class="dynamic-group option-grid wide" data-group="surprise">
+    <label class="opt radio"><input type="radio" name="scope" data-zh="1800" data-en="75"><div class="opt-label"><span class="opt-name"><span class="lang-zh">平塗+簡單陰影+素材</span><span class="lang-en">Flat color + Assets</span></span><span class="opt-price">1800 / 75</span><span class="opt-note"><span class="lang-zh">作畫約1週內完成</span><span class="lang-en">Completed within ~1 week.</span></span></div></label>
+    <label class="opt radio"><input type="radio" name="scope" data-zh="2800" data-en="110"><div class="opt-label"><span class="opt-name"><span class="lang-zh">花與時分 (花卉與角色)</span><span class="lang-en">Floral & Time</span></span><span class="opt-price">2800 / 110</span><span class="opt-note"><span class="lang-zh">接近小品插畫完稿度</span><span class="lang-en">Finish level similar to Simple Illust.</span></span></div></label>
+    <label class="opt radio"><input type="radio" name="scope" data-zh="3500" data-en="140"><div class="opt-label"><span class="opt-name"><span class="lang-zh">塔羅牌系列</span><span class="lang-en">Tarot Series</span></span><span class="opt-price">3500 / 140</span><span class="opt-note"><span class="lang-zh">邊框模板+平塗+簡單陰影</span><span class="lang-en">Frame template + flat color</span></span></div></label>
+  </div>
+
+  <div class="dynamic-group option-grid" data-group="chibi">
+    <label class="opt radio"><input type="radio" name="scope" data-zh="600" data-en="25"><div class="opt-label"><span class="opt-name"><span class="lang-zh">頭像</span><span class="lang-en">Headshot</span></span><span class="opt-price">600 / 25</span><span class="opt-note"><span class="lang-zh">一般為簡單背景</span><span class="lang-en">Usually simple BG.</span></span></div></label>
+    <label class="opt radio"><input type="radio" name="scope" data-zh="1000" data-en="45"><div class="opt-label"><span class="opt-name"><span class="lang-zh">半身</span><span class="lang-en">Half-body</span></span><span class="opt-price">1000 / 45</span></div></label>
+    <label class="opt radio"><input type="radio" name="scope" data-zh="1500" data-en="65"><div class="opt-label"><span class="opt-name"><span class="lang-zh">全身</span><span class="lang-en">Full-body</span></span><span class="opt-price">1500 / 65</span></div></label>
+  </div>
+
+  <div class="dynamic-group option-grid wide" data-group="ref_sheet">
+    <label class="opt radio"><input type="radio" name="scope" data-zh="6500" data-en="280"><div class="opt-label"><span class="opt-name"><span class="lang-zh">DND / COC / 一般立繪</span><span class="lang-en">General Ref Sheet</span></span><span class="opt-price">6500 / 280</span><span class="opt-note"><span class="lang-zh">包含正背、表情x3、胸像、色票</span><span class="lang-en">Includes front/back, expressions x3, bust, palette</span></span></div></label>
+  </div>
+</div>
+
+<div class="step-section" id="step3">
+  <div class="section-title"><span class="step-badge">3</span> <span class="lang-zh">背景與附加需求</span><span class="lang-en">Background & Add-ons</span></div>
+  
+  <div id="group-bg" class="option-grid" style="margin-bottom: 16px;">
+    <label class="opt radio"><input type="radio" name="bg" value="0" checked><div class="opt-label"><span class="opt-name"><span class="lang-zh">無 / 簡單色塊背景</span><span class="lang-en">None / Simple BG</span></span><span class="opt-price"><span class="lang-zh">基本價 / Base</span><span class="lang-en">Base Price</span></span></div></label>
+    <label class="opt radio"><input type="radio" name="bg" id="opt-complex-bg"><div class="opt-label"><span class="opt-name"><span class="lang-zh">複雜背景</span><span class="lang-en">Complex BG</span></span><span class="opt-price" id="complex-bg-display"></span><span class="opt-note"><span class="lang-zh">視複雜程度往上加價</span><span class="lang-en">Price increases based on details.</span></span></div></label>
+  </div>
+
+  <div id="group-addons" class="option-grid">
+    <label class="opt checkbox"><input type="checkbox" name="addon" data-zh="TBD (另行報價)" data-en="TBD"><div class="opt-label"><span class="opt-name"><span class="lang-zh">追加角色 / 雙人</span><span class="lang-en">Extra Character(s)</span></span><span class="opt-price">TBD</span></div></label>
+    <label class="opt checkbox"><input type="checkbox" name="addon" data-zh="TBD (另行報價)" data-en="TBD"><div class="opt-label"><span class="opt-name"><span class="lang-zh">複雜服飾 / 道具</span><span class="lang-en">Complex Outfit / Props</span></span><span class="opt-price">TBD</span></div></label>
+    <label class="opt checkbox"><input type="checkbox" name="addon" data-zh="TBD (另行報價)" data-en="TBD"><div class="opt-label"><span class="opt-name"><span class="lang-zh">寵物 / 小動物</span><span class="lang-en">Pets / Animals</span></span><span class="opt-price">TBD</span></div></label>
+  </div>
+
+  <div id="group-ref-addons" class="option-grid" style="display:none;">
+    <label class="opt checkbox"><input type="checkbox" name="addon" data-zh="TBD (另行報價)" data-en="TBD"><div class="opt-label"><span class="opt-name"><span class="lang-zh">追加小插畫</span><span class="lang-en">Add Small Illust.</span></span><span class="opt-price">TBD</span></div></label>
+    <label class="opt checkbox"><input type="checkbox" name="addon" data-zh="TBD (另行報價)" data-en="TBD"><div class="opt-label"><span class="opt-name"><span class="lang-zh">角色配件組拆解</span><span class="lang-en">Accessories / Items</span></span><span class="opt-price">TBD</span></div></label>
+  </div>
+</div>
+
+<div class="result-wrap">
+  <div class="result-box">
+    <div class="result-header">
+      <div>
+        <div class="result-label"><span class="lang-zh">預估總額</span><span class="lang-en">Estimated Total</span></div>
+        <div class="result-price" id="resultPrice"><span style="font-size:16px; color:var(--text-dim); font-family:'Noto Sans TC',sans-serif;"><span class="lang-zh">等待選擇...</span><span class="lang-en">Waiting for selection...</span></span></div>
+      </div>
+    </div>
+    
+    <div class="result-breakdown" id="breakdown"></div>
+
+    <div class="result-note">
+      <span class="lang-zh">
+        ※ 標示 <strong>TBD (另行報價)</strong> 的項目及實際總價，皆需以提供參考圖並來信討論後，畫師給出的最終報價為準。<br>
+        ※ 角色設定圖目前不受理「純文字設定」的無中生有設計。<br>
+        📬 biruaruart@gmail.com
+      </span>
+      <span class="lang-en">
+        ※ Items marked <strong>TBD</strong> and the final total are estimates. Exact quotes will be provided after discussing your references via email.<br>
+        ※ Reference sheets require visual references. Text-only descriptions for from-scratch designs are not accepted.<br>
+        📬 biruaruart@gmail.com
+      </span>
+    </div>
+  </div>
+</div>
+
+<script>
+  let currentLang = 'zh';
+
+  // Format helper
+  function fmtPrice(val) {
+    if (val === 0) return '';
+    return currentLang === 'zh' ? 'NTD ' + Number(val).toLocaleString() : 'USD ' + val;
+  }
+
+  // Update static UI texts based on language
+  function updateStaticTexts() {
+    document.querySelectorAll('input[name="scope"]').forEach(el => {
+      const pSpan = el.nextElementSibling.querySelector('.opt-price');
+      pSpan.textContent = currentLang === 'zh' ? 'NTD ' + el.dataset.zh : 'USD ' + el.dataset.en;
+    });
+  }
+
+  function toggleLang() {
+    document.body.classList.toggle('en-mode');
+    currentLang = document.body.classList.contains('en-mode') ? 'en' : 'zh';
+    document.getElementById('langBtn').textContent = currentLang === 'en' ? '中文版 / EN' : 'EN / 中文';
+    updateStaticTexts();
+    calc(); 
+  }
+
+  // --- UI State Management ---
+  const step2 = document.getElementById('step2');
+  const step3 = document.getElementById('step3');
+  let selectedCategory = null;
+
+  document.querySelectorAll('input[name="category"]').forEach(radio => {
+    radio.addEventListener('change', (e) => {
+      selectedCategory = e.target.value;
+      
+      // Reveal Step 2
+      step2.classList.add('active');
+      step3.classList.remove('active'); // Hide step 3 until scope is selected
+
+      // Hide all scope groups, show the matching one
+      document.querySelectorAll('.dynamic-group').forEach(g => g.classList.remove('show'));
+      document.querySelector(`.dynamic-group[data-group="${selectedCategory}"]`).classList.add('show');
+
+      // Reset scopes & addons
+      document.querySelectorAll('input[name="scope"]').forEach(r => r.checked = false);
+      document.querySelectorAll('input[name="bg"], input[name="addon"]').forEach(r => r.checked = false);
+      document.querySelector('input[name="bg"][value="0"]').checked = true; // reset bg to default
+
+      // Configure Step 3 layout based on Category
+      const groupBg = document.getElementById('group-bg');
+      const groupAddons = document.getElementById('group-addons');
+      const groupRefAddons = document.getElementById('group-ref-addons');
+      const complexBgOpt = document.getElementById('opt-complex-bg');
+      const complexBgDisplay = document.getElementById('complex-bg-display');
+
+      if (selectedCategory === 'detailed' || selectedCategory === 'simple') {
+        groupBg.style.display = 'grid';
+        complexBgOpt.dataset.zh = 1000; complexBgOpt.dataset.en = 40;
+        complexBgDisplay.innerHTML = `<span class="lang-zh">+NTD 1,000~</span><span class="lang-en">+USD 40~</span>`;
+        groupAddons.style.display = 'grid'; groupRefAddons.style.display = 'none';
+      } else if (selectedCategory === 'chibi') {
+        groupBg.style.display = 'grid';
+        complexBgOpt.dataset.zh = 800; complexBgOpt.dataset.en = 30;
+        complexBgDisplay.innerHTML = `<span class="lang-zh">+NTD 800</span><span class="lang-en">+USD 30</span>`;
+        groupAddons.style.display = 'grid'; groupRefAddons.style.display = 'none';
+      } else if (selectedCategory === 'ref_sheet') {
+        groupBg.style.display = 'none'; // No bg choice
+        groupAddons.style.display = 'none'; groupRefAddons.style.display = 'grid';
+      } else {
+        // Doodle & Surprise
+        groupBg.style.display = 'none';
+        groupAddons.style.display = 'grid'; groupRefAddons.style.display = 'none';
+        if(selectedCategory === 'surprise') groupAddons.style.display = 'none'; // Surprise boxes don't get addons usually
+      }
+
+      calc();
+    });
+  });
+
+  document.querySelectorAll('input[name="scope"]').forEach(radio => {
+    radio.addEventListener('change', () => {
+      step3.classList.add('active'); // Reveal Step 3
+      calc();
+    });
+  });
+
+  document.querySelectorAll('input[name="bg"], input[name="addon"]').forEach(el => {
+    el.addEventListener('change', calc);
+  });
+
+  // --- Calculation ---
+  function getText(inputEl) {
+    const nameEl = inputEl.nextElementSibling.querySelector('.opt-name');
+    const langSpan = nameEl.querySelector('.lang-' + currentLang);
+    return langSpan ? langSpan.textContent : nameEl.textContent;
+  }
+
+  function calc() {
+    let total = 0;
+    let items = [];
+
+    // Check scope
+    const scopeEl = document.querySelector('input[name="scope"]:checked');
+    if (!scopeEl) {
+      document.getElementById('resultPrice').innerHTML = `<span style="font-size:16px; color:var(--text-dim); font-family:'Noto Sans TC',sans-serif;"><span class="lang-zh">等待選擇...</span><span class="lang-en">Waiting for selection...</span></span>`;
+      document.getElementById('breakdown').innerHTML = '';
+      return;
+    }
+
+    // Add Scope
+    const scopePrice = parseInt(currentLang === 'zh' ? scopeEl.dataset.zh : scopeEl.dataset.en);
+    total += scopePrice;
+    items.push({ name: getText(scopeEl), priceText: fmtPrice(scopePrice) });
+
+    // Add BG (if visible and checked)
+    if (document.getElementById('group-bg').style.display !== 'none') {
+      const bgEl = document.querySelector('input[name="bg"]:checked');
+      if (bgEl && bgEl.value !== "0") {
+        const bgPrice = parseInt(currentLang === 'zh' ? bgEl.dataset.zh : bgEl.dataset.en);
+        total += bgPrice;
+        items.push({ name: getText(bgEl), priceText: '+ ' + fmtPrice(bgPrice) + (selectedCategory !== 'chibi' ? '~' : '') });
+      }
+    }
+
+    // Add Add-ons (TBD)
+    let hasTBD = false;
+    document.querySelectorAll('input[name="addon"]:checked').forEach(el => {
+      // Add-ons are visible or hidden depending on category, only count if parent is not hidden
+      if (el.closest('.option-grid').style.display !== 'none') {
+        hasTBD = true;
+        items.push({ name: getText(el), priceText: currentLang === 'zh' ? el.dataset.zh : el.dataset.en });
+      }
+    });
+
+    // Render Total
+    let totalStr = fmtPrice(total);
+    if(selectedCategory !== 'pixel' && selectedCategory !== 'chibi' && !hasTBD) {
+       totalStr += '~'; // Base prices have wiggle room
+    }
+    if(hasTBD) {
+       totalStr += ' + <span style="font-size:20px;">TBD</span>';
+    }
+    document.getElementById('resultPrice').innerHTML = totalStr;
+
+    // Render Breakdown
+    let html = '';
+    items.forEach(item => {
+      html += `<div class="breakdown-row"><span>${item.name}</span><span>${item.priceText}</span></div>`;
+    });
+    document.getElementById('breakdown').innerHTML = html;
+  }
+
+  // Init
+  updateStaticTexts();
+</script>
+</body>
+</html>
