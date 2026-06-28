@@ -1,0 +1,489 @@
+<!DOCTYPE html>
+<html lang="zh-TW">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Adventurer's Registry — 冒險者登錄冊 (Ultimate Edition)</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link href="https://fonts.googleapis.com/css2?family=IM+Fell+English:ital@0;1&family=Cinzel:wght@400;600&family=Noto+Serif+TC:wght@300;400;500&display=swap" rel="stylesheet">
+<style>
+  :root {
+    --ink:        #2a1f0e;
+    --ink-faded:  #5c4a2a;
+    --parchment:  #f2e8d0;
+    --parchment-dark: #e8d8b0;
+    --parchment-shadow: #c9b88a;
+    --red-seal:   #8b2020;
+    --gold:       #a07828;
+    --rule:       #9a8058;
+  }
+
+  * { box-sizing: border-box; margin: 0; padding: 0; }
+
+  body {
+    background: #1a120a;
+    background-image:
+      radial-gradient(ellipse at 20% 20%, #2a1a08 0%, transparent 60%),
+      radial-gradient(ellipse at 80% 80%, #0e0a05 0%, transparent 60%);
+    min-height: 100vh;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    padding: 2rem 1rem;
+    font-family: 'Noto Serif TC', 'IM Fell English', serif;
+  }
+
+  .page-wrap {
+    width: 100%;
+    max-width: 680px;
+  }
+
+  .book-header {
+    text-align: center;
+    margin-bottom: 0;
+    position: relative;
+  }
+
+  .book-header .title-en {
+    font-family: 'Cinzel', serif;
+    font-size: 1.05rem;
+    letter-spacing: 0.3em;
+    color: var(--parchment-shadow);
+    text-transform: uppercase;
+    opacity: 0.7;
+  }
+
+  .book-header .title-zh {
+    font-family: 'Cinzel', serif;
+    font-size: 2rem;
+    color: var(--gold);
+    letter-spacing: 0.1em;
+    margin: 0.2rem 0;
+    text-shadow: 0 0 20px rgba(160,120,40,0.4);
+  }
+
+  .parchment {
+    background: var(--parchment);
+    background-image:
+      url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='300' height='300'%3E%3Cfilter id='n'%3E%3CfeTurbulence type='fractalNoise' baseFrequency='0.65' numOctaves='3' stitchTiles='stitch'/%3E%3CfeColorMatrix type='saturate' values='0'/%3E%3C/filter%3E%3Crect width='300' height='300' filter='url(%23n)' opacity='0.08'/%3E%3C/svg%3E"),
+      linear-gradient(160deg, #f5ecca 0%, #ecddb8 40%, #e8d4a8 100%);
+    border: 1px solid var(--parchment-shadow);
+    box-shadow:
+      0 0 0 6px #2a1f0e,
+      0 0 0 8px var(--gold),
+      0 20px 60px rgba(0,0,0,0.7),
+      inset 0 0 40px rgba(160,120,40,0.08);
+    padding: 2.5rem 2.8rem 3rem;
+    position: relative;
+    margin-top: 1.5rem;
+  }
+
+  .parchment::before, .parchment::after {
+    content: '✦';
+    position: absolute;
+    color: var(--gold);
+    font-size: 1.1rem;
+    opacity: 0.6;
+  }
+  .parchment::before { top: 0.8rem; left: 1rem; }
+  .parchment::after  { bottom: 0.8rem; right: 1rem; }
+
+  .corner-br::before, .corner-br::after {
+    content: '✦';
+    position: absolute;
+    color: var(--gold);
+    font-size: 1.1rem;
+    opacity: 0.6;
+  }
+  .corner-br::before { top: 0.8rem; right: 1rem; }
+  .corner-br::after  { bottom: 0.8rem; left: 1rem; }
+  .corner-br {
+    position: absolute;
+    inset: 0;
+    pointer-events: none;
+  }
+
+  .registry-stamp {
+    display: flex;
+    justify-content: space-between;
+    align-items: flex-start;
+    margin-bottom: 1.4rem;
+  }
+
+  .registry-no {
+    font-family: 'IM Fell English', serif;
+    font-size: 0.78rem;
+    color: var(--ink-faded);
+    line-height: 1.8;
+  }
+
+  .seal {
+    width: 56px;
+    height: 56px;
+    border-radius: 50%;
+    border: 2px solid var(--red-seal);
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    color: var(--red-seal);
+    font-family: 'Cinzel', serif;
+    font-size: 0.5rem;
+    text-align: center;
+    letter-spacing: 0.05em;
+    line-height: 1.4;
+    text-transform: uppercase;
+    opacity: 0.75;
+    transform: rotate(-8deg);
+    flex-shrink: 0;
+  }
+
+  .rule {
+    border: none;
+    border-top: 1px solid var(--rule);
+    margin: 1rem 0;
+    opacity: 0.5;
+  }
+  .rule.double {
+    border-top: 2px double var(--rule);
+    opacity: 0.4;
+  }
+
+  .field {
+    display: grid;
+    grid-template-columns: 110px 1fr;
+    gap: 0.3rem 1rem;
+    margin-bottom: 0.85rem;
+    align-items: baseline;
+  }
+
+  .field-label {
+    font-family: 'Cinzel', serif;
+    font-size: 0.65rem;
+    letter-spacing: 0.15em;
+    color: var(--ink-faded);
+    text-transform: uppercase;
+    padding-top: 0.1rem;
+    white-space: nowrap;
+  }
+
+  .field-value {
+    font-family: 'IM Fell English', serif;
+    font-size: 1.05rem;
+    color: var(--ink);
+    line-height: 1.5;
+    border-bottom: 1px dotted var(--parchment-shadow);
+    padding-bottom: 0.2rem;
+    min-height: 1.6rem;
+    transition: opacity 0.3s;
+  }
+
+  .field-value .sub {
+    font-style: italic;
+    font-size: 0.85rem;
+    color: var(--ink-faded);
+  }
+
+  .field-value.traits {
+    display: flex;
+    flex-wrap: wrap;
+    gap: 0.4rem;
+    border-bottom: none;
+    padding-bottom: 0;
+  }
+
+  .trait-tag {
+    background: rgba(42,31,14,0.07);
+    border: 1px solid var(--parchment-shadow);
+    border-radius: 2px;
+    padding: 0.1rem 0.5rem;
+    font-size: 0.88rem;
+    font-family: 'Noto Serif TC', serif;
+    color: var(--ink);
+    white-space: nowrap;
+  }
+
+  .field-value.goal {
+    font-style: italic;
+    font-size: 0.95rem;
+    line-height: 1.7;
+    border-bottom: none;
+    color: var(--ink-faded);
+  }
+
+  .btn-wrap {
+    text-align: center;
+    margin-top: 2rem;
+  }
+
+  .btn-roll {
+    font-family: 'Cinzel', serif;
+    font-size: 0.85rem;
+    letter-spacing: 0.2em;
+    text-transform: uppercase;
+    color: var(--parchment);
+    background: var(--ink);
+    border: 2px solid var(--gold);
+    padding: 0.75rem 2.4rem;
+    cursor: pointer;
+    transition: all 0.18s;
+    box-shadow: 0 4px 16px rgba(0,0,0,0.4), inset 0 1px 0 rgba(255,255,255,0.05);
+    position: relative;
+    outline: none;
+  }
+
+  .btn-roll::before, .btn-roll::after {
+    content: '⚔';
+    position: absolute;
+    top: 50%;
+    transform: translateY(-50%);
+    color: var(--gold);
+    font-size: 0.9rem;
+    opacity: 0.7;
+  }
+  .btn-roll::before { left: 0.8rem; }
+  .btn-roll::after  { right: 0.8rem; }
+
+  .btn-roll:hover {
+    background: #3d2c14;
+    box-shadow: 0 4px 24px rgba(160,120,40,0.3), inset 0 1px 0 rgba(255,255,255,0.08);
+    color: var(--gold);
+  }
+
+  .btn-roll:active { transform: translateY(1px); }
+
+  .btn-hint {
+    font-family: 'IM Fell English', serif;
+    font-style: italic;
+    font-size: 0.75rem;
+    color: var(--parchment-shadow);
+    margin-top: 0.8rem;
+    opacity: 0.6;
+  }
+
+  .empty-state {
+    text-align: center;
+    padding: 1.5rem 0;
+    color: var(--ink-faded);
+    font-style: italic;
+    font-family: 'IM Fell English', serif;
+    font-size: 0.95rem;
+    opacity: 0.6;
+    line-height: 1.8;
+  }
+
+  .fade-in {
+    animation: fadeIn 0.4s ease;
+  }
+  @keyframes fadeIn {
+    from { opacity: 0; transform: translateY(4px); }
+    to   { opacity: 1; transform: translateY(0); }
+  }
+
+  @media (max-width: 480px) {
+    .parchment { padding: 1.8rem 1.4rem 2rem; }
+    .field { grid-template-columns: 90px 1fr; }
+    .book-header .title-zh { font-size: 1.5rem; }
+  }
+</style>
+</head>
+<body>
+
+<div class="page-wrap">
+  <div class="book-header">
+    <div class="title-en">Adventurer's Registry</div>
+    <div class="title-zh">冒險者登錄冊</div>
+  </div>
+
+  <div class="parchment">
+    <div class="corner-br"></div>
+
+    <div class="registry-stamp">
+      <div class="registry-no">
+        檔案編號 File No.<br>
+        <span id="file-no" style="font-size:1.1rem; color:var(--ink);">— — —</span><br>
+        登錄時間 / <span id="timestamp" style="font-size:0.7rem;">—</span>
+      </div>
+      <div class="seal">Guild<br>Registry<br>✦<br>Official</div>
+    </div>
+
+    <hr class="rule double">
+
+    <div id="result-area">
+      <div class="empty-state">
+        按下「擲骰」按鍵，<br>從命運之書召喚一位旅人。
+      </div>
+    </div>
+
+    <div class="btn-wrap">
+      <button class="btn-roll" onclick="rollCharacter()">擲骰 · Roll the Dice</button>
+      <div class="btn-hint">每次召喚，皆是命中注定的相遇。</div>
+    </div>
+  </div>
+</div>
+
+<script>
+// ── Data ──────────────────────────────────────────────────────────
+
+const genders = [
+  { label: '男性 Male', icon: '♂' },
+  { label: '女性 Female', icon: '♀' },
+  { label: '非二元 Non-binary', icon: '⚧' },
+  { label: '無性別 Agender', icon: '◇' },
+];
+
+const namesByGender = {
+  '男性 Male': [{"name": "Aldric", "origin": "古英語", "meaning": "高貴的統治者"}, {"name": "Caelum", "origin": "拉丁語", "meaning": "天空、蒼穹"}, {"name": "Darius", "origin": "波斯語", "meaning": "守護善良的人"}, {"name": "Emrys", "origin": "威爾斯語", "meaning": "不朽的"}, {"name": "Fionn", "origin": "愛爾蘭語", "meaning": "白、光明"}, {"name": "Gideon", "origin": "希伯來語", "meaning": "伐木者、勇者"}, {"name": "Hadrian", "origin": "拉丁語", "meaning": "來自亞德里亞的"}, {"name": "Idris", "origin": "阿拉伯語/威爾斯語", "meaning": "炙熱的主、熱切的人"}, {"name": "Jareth", "origin": "奇幻創作", "meaning": "無既定語源，現代幻想名"}, {"name": "Kiran", "origin": "梵語", "meaning": "光芒、光線"}, {"name": "Leif", "origin": "北歐語", "meaning": "繼承者、後裔"}, {"name": "Maddox", "origin": "威爾斯語", "meaning": "幸運的守護者之子"}, {"name": "Niran", "origin": "泰語", "meaning": "永恆的"}, {"name": "Oryn", "origin": "奇幻創作", "meaning": "無語源，聽感古典"}, {"name": "Peregrine", "origin": "拉丁語", "meaning": "旅行者、異鄉人"}, {"name": "Quillan", "origin": "愛爾蘭語", "meaning": "細細的"}, {"name": "Rowan", "origin": "蘇格蘭/愛爾蘭語", "meaning": "花楸樹、紅色"}, {"name": "Soren", "origin": "丹麥語", "meaning": "嚴肅的"}, {"name": "Theron", "origin": "希臘語", "meaning": "獵人"}, {"name": "Urien", "origin": "威爾斯語", "meaning": "出身特權的人"}, {"name": "Vespero", "origin": "拉丁語", "meaning": "夕星、黃昏之星"}, {"name": "Wulfric", "origin": "古英語", "meaning": "狼的力量"}, {"name": "Xander", "origin": "希臘語", "meaning": "守護人類的人"}, {"name": "Yusuf", "origin": "阿拉伯語/希伯來語", "meaning": "神會增加、神賜予"}, {"name": "Zephyr", "origin": "希臘語", "meaning": "西風、輕柔的風"}, {"name": "Kaelen", "origin": "古精靈語", "meaning": "守護卷軸之人"}, {"name": "Valerius", "origin": "帝國語", "meaning": "強健的歷史學者"}, {"name": "Silas", "origin": "拉丁語", "meaning": "森林之神"}, {"name": "Lucian", "origin": "拉丁語", "meaning": "光明的攜帶者"}, {"name": "Ronan", "origin": "愛爾蘭語", "meaning": "小海豹"}, {"name": "Thorne", "origin": "古英語", "meaning": "荊棘叢生之處"}, {"name": "Alaric", "origin": "日耳曼語", "meaning": "全能的統治者"}, {"name": "Aric", "origin": "古英語", "meaning": "永恆的統治者"}, {"name": "Balthazar", "origin": "巴比倫語", "meaning": "保護國王生命的人"}, {"name": "Corin", "origin": "拉丁語", "meaning": "持矛者"}, {"name": "Dante", "origin": "拉丁語", "meaning": "持久的、堅忍的"}, {"name": "Evander", "origin": "希臘語", "meaning": "好人、善良的人"}, {"name": "Fenrir", "origin": "北歐神話", "meaning": "沼澤居住者"}, {"name": "Gael", "origin": "愛爾蘭語", "meaning": "陌生人"}, {"name": "Hugin", "origin": "北歐神話", "meaning": "思想"}, {"name": "Ivor", "origin": "威爾斯語", "meaning": "弓箭手"}, {"name": "Jaskier", "origin": "波蘭語", "meaning": "毛茛花"}, {"name": "Kael", "origin": "蓋爾語", "meaning": "纖細的"}, {"name": "Lorian", "origin": "拉丁語", "meaning": "戴月桂冠的人"}, {"name": "Morven", "origin": "蘇格蘭語", "meaning": "巨大的山峰"}, {"name": "Nyx", "origin": "希臘語", "meaning": "黑夜"}, {"name": "Orson", "origin": "拉丁語", "meaning": "像熊一樣的"}, {"name": "Phelan", "origin": "愛爾蘭語", "meaning": "狼"}, {"name": "Qadir", "origin": "阿拉伯語", "meaning": "強大的"}, {"name": "Rhogar", "origin": "龍語", "meaning": "火焰與岩石"}, {"name": "Sylas", "origin": "拉丁語", "meaning": "森林之神"}, {"name": "Talon", "origin": "英語", "meaning": "猛禽的爪"}, {"name": "Ulric", "origin": "古英語", "meaning": "強大的狼"}, {"name": "Vane", "origin": "英語", "meaning": "風向標"}, {"name": "Wyll", "origin": "英語", "meaning": "堅定的意志"}, {"name": "Xenos", "origin": "希臘語", "meaning": "客人、陌生人"}, {"name": "Yael", "origin": "希伯來語", "meaning": "山羊"}],
+  '女性 Female': [{"name": "Aditi", "origin": "梵語（印度）", "meaning": "宇宙、無邊無際的"}, {"name": "Brynn", "origin": "威爾斯語", "meaning": "山丘"}, {"name": "Calista", "origin": "希臘語", "meaning": "最美麗的"}, {"name": "Delara", "origin": "波斯語", "meaning": "照亮心靈的人"}, {"name": "Eirene", "origin": "希臘語", "meaning": "和平"}, {"name": "Freya", "origin": "北歐語", "meaning": "女神、貴婦人"}, {"name": "Galadriel", "origin": "昆雅語", "meaning": "有光輝之冠的少女"}, {"name": "Isolde", "origin": "凱爾特語", "meaning": "冰、鐵統治者"}, {"name": "Jora", "origin": "奇幻創作", "meaning": "無語源，音感硬朗"}, {"name": "Kestrel", "origin": "英語（鳥名）", "meaning": "紅隼，象徵自由"}, {"name": "Liriel", "origin": "奇幻創作", "meaning": "無語源，精靈感強"}, {"name": "Morrigan", "origin": "愛爾蘭神話", "meaning": "幻象女王、命運女神"}, {"name": "Nadia", "origin": "斯拉夫語", "meaning": "希望"}, {"name": "Ophelia", "origin": "希臘語", "meaning": "幫助"}, {"name": "Petra", "origin": "希臘語", "meaning": "岩石、堅定"}, {"name": "Rhoswyn", "origin": "威爾斯語", "meaning": "玫瑰與白色之組合"}, {"name": "Seraphine", "origin": "希伯來語", "meaning": "燃燒的人、天使"}, {"name": "Tindra", "origin": "瑞典語", "meaning": "閃爍、微光"}, {"name": "Ulara", "origin": "奇幻創作", "meaning": "無語源，沙漠語感"}, {"name": "Vashti", "origin": "波斯語", "meaning": "美麗"}, {"name": "Wren", "origin": "英語（鳥名）", "meaning": "鷦鷯，象徵小而堅韌"}, {"name": "Xanthe", "origin": "希臘語", "meaning": "金黃色的"}, {"name": "Yara", "origin": "阿拉伯語/巴西語", "meaning": "小蝴蝶／水的女神"}, {"name": "Zara", "origin": "阿拉伯語", "meaning": "公主、光芒"}, {"name": "Lyra", "origin": "古希臘語", "meaning": "星辰與天琴"}, {"name": "Sylphina", "origin": "風之語", "meaning": "追尋顏色的精靈"}, {"name": "Elara", "origin": "拉丁語", "meaning": "閃耀的星"}, {"name": "Maeve", "origin": "愛爾蘭神話", "meaning": "令人陶醉的"}, {"name": "Thalia", "origin": "希臘神話", "meaning": "繁榮、喜劇繆斯"}, {"name": "Vespera", "origin": "世界語", "meaning": "黃昏、夜之降臨"}, {"name": "Aurelia", "origin": "拉丁語", "meaning": "金色的"}, {"name": "Anya", "origin": "俄語", "meaning": "恩典"}, {"name": "Brida", "origin": "凱爾特語", "meaning": "力量"}, {"name": "Cerys", "origin": "威爾斯語", "meaning": "愛"}, {"name": "Danica", "origin": "斯拉夫語", "meaning": "晨星"}, {"name": "Elva", "origin": "愛爾蘭語", "meaning": "白色的、高貴的"}, {"name": "Faelyn", "origin": "奇幻創作", "meaning": "精靈的美麗"}, {"name": "Gwyn", "origin": "威爾斯語", "meaning": "白色的、神聖的"}, {"name": "Hira", "origin": "梵語", "meaning": "鑽石"}, {"name": "Ianthe", "origin": "希臘語", "meaning": "紫色的花"}, {"name": "Junia", "origin": "拉丁語", "meaning": "青春的"}, {"name": "Kaelia", "origin": "奇幻創作", "meaning": "守護者"}, {"name": "Lumina", "origin": "拉丁語", "meaning": "明亮的"}, {"name": "Maude", "origin": "古德語", "meaning": "強大的戰士"}, {"name": "Neria", "origin": "希伯來語", "meaning": "上帝的光"}, {"name": "Olenna", "origin": "烏克蘭語", "meaning": "陽光"}, {"name": "Pyra", "origin": "希臘語", "meaning": "火焰"}, {"name": "Qira", "origin": "波斯語", "meaning": "演說家"}, {"name": "Rina", "origin": "希伯來語", "meaning": "喜悅之歌"}, {"name": "Sena", "origin": "阿拉伯語", "meaning": "世界的美"}, {"name": "Tamsin", "origin": "亞拉姆語", "meaning": "雙胞胎"}, {"name": "Ulla", "origin": "北歐語", "meaning": "意志"}, {"name": "Vira", "origin": "梵語", "meaning": "勇敢的女人"}, {"name": "Winry", "origin": "英語", "meaning": "朋友"}, {"name": "Xena", "origin": "希臘語", "meaning": "好客的"}, {"name": "Ysabel", "origin": "西班牙語", "meaning": "向上帝起誓"}],
+  '非二元 Non-binary': [{"name": "Aether", "origin": "希臘語", "meaning": "最高的空氣、乙太"}, {"name": "Cael", "origin": "愛爾蘭語", "meaning": "細長的、纖細"}, {"name": "Dusk", "origin": "英語", "meaning": "黃昏，界限之時"}, {"name": "Ember", "origin": "英語", "meaning": "餘燼、火星"}, {"name": "Flynn", "origin": "愛爾蘭語", "meaning": "紅色的後裔"}, {"name": "Indigo", "origin": "英語（顏色）", "meaning": "靛藍，深沉神秘"}, {"name": "Lumen", "origin": "拉丁語", "meaning": "光、光量"}, {"name": "Rune", "origin": "北歐語", "meaning": "秘密、神秘符文"}, {"name": "Sable", "origin": "法語", "meaning": "黑色的，如深夜"}, {"name": "Tavi", "origin": "奇幻創作", "meaning": "無語源，隨性輕盈"}, {"name": "Vale", "origin": "拉丁語", "meaning": "山谷、再見（告別）"}, {"name": "Wynn", "origin": "威爾斯語", "meaning": "白色、快樂"}, {"name": "Onyx", "origin": "礦物語", "meaning": "純黑的寶石"}, {"name": "Solstice", "origin": "通用語", "meaning": "至日、時間的轉折"}, {"name": "Ash", "origin": "英語", "meaning": "灰燼、重生"}, {"name": "Echo", "origin": "希臘神話", "meaning": "回音、殘留的聲音"}, {"name": "Sage", "origin": "拉丁語", "meaning": "智慧、聖人"}, {"name": "Briar", "origin": "英語", "meaning": "野玫瑰叢、堅韌"}, {"name": "Quinn", "origin": "愛爾蘭語", "meaning": "智慧的傳承"}, {"name": "Cove", "origin": "英語", "meaning": "小海灣"}, {"name": "Dust", "origin": "英語", "meaning": "塵埃"}, {"name": "Fern", "origin": "英語", "meaning": "蕨類植物"}, {"name": "Gale", "origin": "英語", "meaning": "強風"}, {"name": "Haven", "origin": "英語", "meaning": "避風港"}, {"name": "Isle", "origin": "英語", "meaning": "島嶼"}, {"name": "Jinx", "origin": "英語", "meaning": "厄運、魔咒"}, {"name": "Kite", "origin": "英語", "meaning": "鳶"}, {"name": "Lark", "origin": "英語", "meaning": "雲雀"}, {"name": "Moss", "origin": "英語", "meaning": "青苔"}, {"name": "Pine", "origin": "英語", "meaning": "松樹"}, {"name": "Quill", "origin": "英語", "meaning": "羽毛筆"}, {"name": "Rain", "origin": "英語", "meaning": "雨"}, {"name": "Slate", "origin": "英語", "meaning": "石板"}, {"name": "Teal", "origin": "英語", "meaning": "藍綠色"}, {"name": "Umber", "origin": "英語", "meaning": "赭色"}, {"name": "Vesper", "origin": "拉丁語", "meaning": "晚星"}, {"name": "Winter", "origin": "英語", "meaning": "冬天"}, {"name": "Xylem", "origin": "希臘語", "meaning": "木質部"}, {"name": "Yarrow", "origin": "英語", "meaning": "蓍草"}, {"name": "Zeal", "origin": "英語", "meaning": "熱忱"}, {"name": "Aura", "origin": "拉丁語", "meaning": "微風、光環"}, {"name": "Bane", "origin": "英語", "meaning": "災禍"}, {"name": "Dawn", "origin": "英語", "meaning": "黎明"}, {"name": "Eon", "origin": "希臘語", "meaning": "永恆的時間"}],
+  '無性別 Agender': [{"name": "Aether", "origin": "希臘語", "meaning": "最高的空氣、乙太"}, {"name": "Cael", "origin": "愛爾蘭語", "meaning": "細長的、纖細"}, {"name": "Lumen", "origin": "拉丁語", "meaning": "光、光量"}, {"name": "Rune", "origin": "北歐語", "meaning": "秘密、神秘符文"}, {"name": "Vale", "origin": "拉丁語", "meaning": "山谷、告別"}, {"name": "Onyx", "origin": "礦物語", "meaning": "純黑的寶石"}, {"name": "Solstice", "origin": "通用語", "meaning": "至日、時間的轉折"}, {"name": "Ash", "origin": "英語", "meaning": "灰燼、重生"}, {"name": "Echo", "origin": "希臘神話", "meaning": "回音、殘留的聲音"}, {"name": "Apex", "origin": "拉丁語", "meaning": "頂點"}, {"name": "Blank", "origin": "英語", "meaning": "空白"}, {"name": "Cipher", "origin": "阿拉伯語", "meaning": "密碼、零"}, {"name": "Drift", "origin": "英語", "meaning": "漂流"}, {"name": "Enigma", "origin": "希臘語", "meaning": "謎團"}, {"name": "Flux", "origin": "拉丁語", "meaning": "變動、流動"}, {"name": "Gaze", "origin": "英語", "meaning": "凝視"}, {"name": "Halo", "origin": "希臘語", "meaning": "光環"}, {"name": "Icon", "origin": "希臘語", "meaning": "象徵"}, {"name": "Jest", "origin": "英語", "meaning": "玩笑"}, {"name": "Karma", "origin": "梵語", "meaning": "業力"}, {"name": "Loom", "origin": "英語", "meaning": "織布機、隱現"}, {"name": "Maze", "origin": "英語", "meaning": "迷宮"}, {"name": "Null", "origin": "拉丁語", "meaning": "無"}, {"name": "Orbit", "origin": "拉丁語", "meaning": "軌道"}, {"name": "Prism", "origin": "希臘語", "meaning": "稜鏡"}, {"name": "Quest", "origin": "拉丁語", "meaning": "追尋"}, {"name": "Spark", "origin": "英語", "meaning": "火花"}, {"name": "Trace", "origin": "英語", "meaning": "痕跡"}, {"name": "Unit", "origin": "拉丁語", "meaning": "單位"}, {"name": "Void", "origin": "英語", "meaning": "虛空"}, {"name": "Warp", "origin": "英語", "meaning": "扭曲、經線"}, {"name": "X", "origin": "通用", "meaning": "未知數"}, {"name": "Zenith", "origin": "阿拉伯語", "meaning": "天頂"}, {"name": "Glitch", "origin": "現代語", "meaning": "小故障"}]
+};
+
+const races = [
+  { name: '人類 Human', lifespan: [20, 80], note: '壽命平均 60–80 年' },
+  { name: '高等精靈 High Elf', lifespan: [80, 700], note: '壽命可達數百乃至逾千年' },
+  { name: '木精靈 Wood Elf', lifespan: [60, 500], note: '壽命約三至五百年' },
+  { name: '黑暗精靈 Drow', lifespan: [80, 650], note: '壽命約六百餘年' },
+  { name: '矮人 Dwarf', lifespan: [50, 350], note: '壽命約三百至四百年' },
+  { name: '半身人 Halfling', lifespan: [20, 150], note: '壽命約一百年餘' },
+  { name: '地侏 Gnome', lifespan: [40, 400], note: '壽命可達三至五百年' },
+  { name: '半精靈 Half-Elf', lifespan: [20, 180], note: '壽命約一百五十至二百年' },
+  { name: '半獸人 Half-Orc', lifespan: [14, 75], note: '壽命約六十至七十五年' },
+  { name: '龍裔 Dragonborn', lifespan: [15, 80], note: '壽命約八十年' },
+  { name: '惡魔裔 Tiefling', lifespan: [18, 100], note: '壽命略長於人類' },
+  { name: '天界裔 Aasimar', lifespan: [20, 160], note: '壽命受天界血統影響可達百餘年' },
+  { name: '獸人 Orc', lifespan: [12, 60], note: '壽命較短，約六十年' },
+  { name: '貓族 Tabaxi', lifespan: [20, 90], note: '壽命與人類相近' },
+  { name: '鳥族 Aarakocra', lifespan: [8, 60], note: '壽命約三十至六十年' },
+  { name: '石蜥族 Lizardfolk', lifespan: [14, 60], note: '壽命約六十年' },
+  { name: '元素裔 Genasi', lifespan: [20, 120], note: '壽命受元素血統影響' },
+  { name: '狼人 Shifter', lifespan: [15, 70], note: '壽命略短於人類' },
+  { name: '骨牌族 Warforged', lifespan: [0, 999], note: '理論上不老不死，視維護而定' },
+  { name: '鬼魂裔 Revenant', lifespan: [0, 200], note: '已死之身藉誓言延續存在' },
+  { name: '幻妖仙靈 Fey', lifespan: [100, 1000], note: '來自妖精荒野，對色彩與藝術有著病態的執著' },
+  { name: '深海人魚 Merfolk', lifespan: [40, 250], note: '壽命約二百年，擁有記載著失落文明的水下歌謠' },
+  { name: '星辰眷族 Starborn', lifespan: [0, 999], note: '由隕石誕生，沒有物理年齡概念的神秘觀測者' }
+];
+
+const traits = ["衝動的", "謹慎的", "好奇的", "冷靜的", "熱情的", "孤僻的", "善良的", "狡猾的", "固執的", "樂觀的", "悲觀的", "沉默的", "饒舌的", "勇敢的", "膽怯的", "忠誠的", "背叛傾向的", "迷信的", "理性的", "富有同情心的", "自私的", "無私的", "驕傲的", "謙遜的", "貪婪的", "慷慨的", "多疑的", "天真的", "世故的", "散漫的", "完美主義的", "懶散的", "有責任感的", "記仇的", "健忘的", "愛惡作劇的", "嚴肅的", "念舊的", "厭惡過去的", "充滿神秘感的", "直白的", "喜怒無常的", "溫柔的", "粗獷的", "喜愛動物的", "迷戀書籍的", "仇恨魔法的", "崇拜魔法的", "懼怕黑暗的", "嚮往自由的", "對美學極度挑剔的", "患有深海恐懼的", "隨身攜帶速寫本的", "沉迷於古老文獻的", "對稱強迫症的", "總是聞起來像舊書的", "擁有過目不忘記憶力的", "容易被亮晶晶物品吸引的", "對魔法物品極度過敏的", "習慣用畫筆記錄對話的", "習慣自言自語的", "極度愛惜裝備的", "睡前必須閱讀的", "喜歡在羊皮紙邊緣塗鴉的", "對色彩感知超乎常人的", "容易對特定材質著迷的", "對毛茸茸生物沒有抵抗力的", "擅長編織小布偶的", "隨身帶著毛線與鉤針的", "喜歡整理書籍分類的", "對排版極度要求的", "絕對不碰甲殼類海鮮的", "排斥牛肉料理的", "熱愛日式炸雞的", "沉迷於桌上遊戲的", "喜歡收集各色布料的", "把圖書館當成第二個家的", "擅長籌辦展覽的", "對書籍裝幀很有研究的", "喜歡在深夜創作的", "身上總有淡淡茶香的", "習慣用透視法觀察建築的", "對色彩和諧非常敏感的", "喜歡寫計畫書的", "擁有驚人手速的", "喜歡逛圖書館的", "隨身攜帶電子閱讀器的", "容易迷路的", "總是忘記別人名字的", "喜歡收集石頭的", "對魔法有強烈好奇心的", "非常怕冷的", "喜歡在雨中散步的", "對數字特別敏感的", "有著奇怪幽默感的", "總是在打瞌睡的", "有潔癖的", "容易被感動的", "非常挑食的", "喜歡唱歌但五音不全的", "對歷史遺跡著迷的", "總是帶著微笑的", "非常注重禮貌的", "有點被害妄想的", "喜歡發明小東西的", "對毒藥有深入研究的", "非常熱愛大自然的", "對金錢斤斤計較的", "有著驚人直覺的", "非常容易相信別人的", "總是保持神秘的", "對星象很有研究的", "非常熱心助人的", "有點路怒症的", "喜歡收集別人秘密的", "對自己的外貌很在意的", "非常擅長說服別人的", "有著雙重人格的", "非常固執己見的", "喜歡挑戰權威的", "對小孩子很有耐心的", "非常害怕昆蟲的", "對料理很有天賦的", "喜歡收集古董的", "非常擅長隱藏情緒的", "對危險有著敏銳嗅覺的", "非常喜歡熱鬧的", "喜歡獨處的", "對各種語言都有興趣的", "非常擅長追蹤的", "對草藥學很精通的", "非常喜歡聽故事的", "對海洋充滿敬畏的", "非常擅長偽裝的", "喜歡解開謎題的", "對神明非常虔誠的", "非常喜歡惡作劇的", "對時間非常敏感的", "喜歡收集武器的", "非常擅長談判的", "對寶石很有鑑賞力的", "非常喜歡旅行的", "喜歡在夜晚活動的", "對各種毒蟲免疫的", "非常擅長木工的", "喜歡收集面具的", "對風向很敏感的", "非常喜歡吹奏樂器的", "喜歡研究機關的", "對各種符文都很了解的", "非常喜歡小動物的", "喜歡收集種子的", "對各種地形都很熟悉的", "非常擅長攀岩的", "喜歡在屋頂上睡覺的", "對各種酒類都很了解的", "非常喜歡吃甜食的", "喜歡收集硬幣的", "對各種傳說都深信不疑的", "非常擅長游泳的", "喜歡收集羽毛的", "對各種暗器都很精通的", "非常喜歡看星星的", "喜歡收集骨頭的", "對各種魔法生物都很了解的", "喜歡聽雨聲的"];
+
+const goals = ["尋找失散多年的家人，不論生死都想知道真相。", "成為王國中最偉大的吟遊詩人，讓故事傳唱千年。", "揭開毀滅故鄉的真相，並向那個人討回公道。", "收集世界上所有失傳的魔法典籍，留存知識給後人。", "在死前親眼見到世界的盡頭，無論那裡有什麼。", "建立一個讓流浪者都能找到歸宿的地方。", "打倒那位曾經讓自己絕望的強者，證明自己的存在。", "完成師父未竟的使命，哪怕要獨自走完這條路。", "找到能讓自己「真正感受到活著」的一刻，為此不惜冒險。", "累積足夠的財富，讓家鄉的人從此不再受貧窮所苦。", "成為能夠守護眾人的盾，讓身邊的人不再受傷。", "在世界末日真正到來之前，盡力享受每一個當下。", "找到能夠接納自己全部的人，不再孤獨地旅行。", "挑戰神明或命運本身，拒絕接受已被注定的結局。", "用旅途中學到的智慧，有朝一日成為被人信賴的導師。", "解開纏繞家族數代的古老詛咒，讓血脈得以自由。", "找到那個從夢中一直出現的地方，確認它是否真實存在。", "以手中的劍或魔法，在歷史上刻下自己的名字。", "成為橋樑，讓彼此敵對的兩個種族得以和解共存。", "僅僅只是活下去，一天接著一天，直到找到值得為之停留的理由。", "追尋長生不老的秘密，因為還有太多事尚未完成。", "將那個人從黑暗中拉回來，無論付出什麼代價。", "找到適合自己安靜生活的小地方，遠離一切紛爭。", "成為最強的冒險者，不是為了名聲，只是想看清自己的極限。", "帶著那把劍去到它的主人本來要去的地方，完成遺願。", "尋找傳說中失落的星辰圖書館，據說那裡藏有世界的真實藍圖。", "走遍大陸，只為了完成一幅能將古老神明具象化的終極插畫。", "收集世界上所有的古文字，試圖解碼一本無人能懂的空白書。", "尋找一種名為「深淵之藍」的夢幻顏料，那是重現故鄉天空唯一的色彩。", "將各地逐漸消亡的民間口傳神話，編纂成一部流傳後世的巨作。", "探尋被埋藏的地下遺跡，找回失落的遠古編年史與造物圖紙。", "追尋傳說中的「創世畫筆」，據說用它畫出的事物能化為現實。", "建立一座中立的文獻庇護所，讓所有種族的知識都能被安全地保存。", "編纂一本涵蓋所有神獸特徵的插畫圖鑑。", "用魔法毛線編織出一座能抵禦寒冬的移動堡壘。", "建立一座不受戰火波及的巨大圖書館。", "策劃一場跨越城市的聯合畫展。", "找尋傳說中能自動作畫的魔法筆。", "設計出一套完美的地下城管理系統。", "將古老的魔法理論編纂成易懂的圖解書。", "尋找絕跡的毛茸茸生物並為牠們繪製肖像。", "用最頂級的棉線製作出神明專屬的祭祀布偶。", "走遍世界品嚐各地限定的炸雞料理。", "收集所有被遺忘的童話並重新出版。", "推動一項大型募款計畫來修復古老圖書館。", "為圖書館設計一系列受歡迎的吉祥物。", "在世界各地推廣編織藝術。", "找到一種能完美呈現星空色彩的水彩顏料。", "成為世界上最富有的商人。", "尋找傳說中的不老泉。", "打倒為禍一方的惡龍。", "建立一個屬於自己的王國。", "解開古代文明滅亡的謎團。", "成為最強的魔法師。", "尋找失落的家族聖物。", "為無辜受害者洗刷冤屈。", "探索未知的黑暗大陸。", "將自己的名字刻在英雄石碑上。", "尋找能治百病的靈藥。", "成為世界上最著名的吟遊詩人。", "終結兩個國家之間的百年戰爭。", "尋找通往神界的階梯。", "成為盜賊公會的首領。", "解開自己身世的秘密。", "為被奴役的種族爭取自由。", "尋找傳說中的神器。", "成為最強的劍客。", "將荒蕪的土地變成綠洲。", "尋找能讓人起死回生的魔法。", "成為世界上最偉大的航海家。", "解開世界上所有的謎題。", "為死去的愛人復仇。", "尋找傳說中的黃金城。", "成為最強的刺客。", "將所有的惡魔趕回深淵。", "尋找能控制時間的神器。", "成為世界上最聰明的學者。", "解開神明留下的預言。", "為世界帶來永久的和平。", "尋找傳說中的天空之城。", "成為最強的召喚師。", "將所有的亡靈超度。", "尋找能讓人飛行的魔法。", "成為世界上最著名的廚師。", "解開宇宙起源的秘密。", "為所有的孤兒建立一個家。", "尋找傳說中的精靈王國。", "成為最強的弓箭手。", "將所有的怪物馴服。", "尋找能讓人隱形的神器。", "成為世界上最偉大的建築師。", "解開生命的奧秘。", "為所有的疾病找到解藥。", "尋找傳說中的龍之谷。", "成為最強的狂戰士。", "將所有的魔法物品收集齊全。", "尋找能讓人變形的神器。", "成為世界上最著名的探險家。", "解開夢境的秘密。", "為所有的靈魂找到歸宿。", "尋找傳說中的海底之城。", "成為最強的聖騎士。", "將所有的邪教消滅。", "尋找能讓人穿越時空的魔法。", "成為世界上最偉大的音樂家。", "解開自然界的法則。", "為所有的生物帶來和諧。", "尋找傳說中的巨人遺跡。", "成為最強的武僧。", "將所有的詛咒解除。", "尋找能讓人讀心術的神器。", "成為世界上最著名的畫家。", "解開元素的秘密。", "為所有的種族建立平等的社會。", "尋找傳說中的妖精森林。", "成為最強的德魯伊。", "將所有的自然災害平息。", "尋找能讓人長生不老的仙丹。", "成為世界上最偉大的發明家。", "解開星辰的運行規律。", "為所有的迷失者指明方向。", "尋找傳說中的幽冥界。", "成為最強的死靈法師。", "將所有的惡靈封印。", "尋找能讓人擁有無窮力量的神器。", "成為世界上最著名的雕塑家。", "解開情感的本質。", "為所有的悲傷帶來慰藉。", "尋找傳說中的神明遺跡。", "成為最強的幻術師。", "將所有的恐懼消除。", "尋找能讓人心想事成的魔法。", "成為世界上最偉大的詩人。"];
+
+// ── Helpers ──────────────────────────────────────────────────────
+
+function pick(arr) {
+  return arr[Math.floor(Math.random() * arr.length)];
+}
+
+function pickMultiple(arr, count) {
+  const shuffled = [...arr].sort(() => Math.random() - 0.5);
+  return shuffled.slice(0, count);
+}
+
+function rand(min, max) {
+  return Math.floor(Math.random() * (max - min + 1)) + min;
+}
+
+function ageLabel(age, race) {
+  const ls = race.lifespan;
+  const span = ls[1] - ls[0];
+  const pos = (age - ls[0]) / span;
+  if (pos < 0.15) return '幼年 / Young';
+  if (pos < 0.30) return '青年 / Adolescent';
+  if (pos < 0.55) return '壯年 / Adult';
+  if (pos < 0.75) return '中年 / Middle-aged';
+  if (pos < 0.90) return '老年 / Elder';
+  return '暮年 / Ancient';
+}
+
+let fileCounter = Math.floor(Math.random() * 900) + 100;
+
+// ── Main ─────────────────────────────────────────────────────────
+
+function rollCharacter() {
+  const gender = pick(genders);
+  const gKey = gender.label;
+
+  // Name — pick from matching gender pool (fall back to nb pool)
+  const namePool = namesByGender[gKey] || namesByGender['非二元 Non-binary'];
+  const nameData = pick(namePool);
+
+  // Race & age
+  const race = pick(races);
+  const age = race.name === '骨牌族 Warforged' || race.name === '星辰眷族 Starborn'
+    ? rand(5, 500)
+    : rand(race.lifespan[0], race.lifespan[1]);
+  const agePhase = ageLabel(age, race);
+
+  // Traits — always 3
+  const traitCount = 3;
+  const selectedTraits = pickMultiple(traits, traitCount);
+
+  // Goal
+  const goal = pick(goals);
+
+  // File number
+  fileCounter++;
+  const fileNo = `ADV-${new Date().getFullYear()}-${String(fileCounter).padStart(4,'0')}`;
+  const now = new Date();
+  const ts = `${now.getFullYear()}/${String(now.getMonth()+1).padStart(2,'0')}/${String(now.getDate()).padStart(2,'0')} ${String(now.getHours()).padStart(2,'0')}:${String(now.getMinutes()).padStart(2,'0')}`;
+
+  // Update UI
+  document.getElementById('file-no').textContent = fileNo;
+  document.getElementById('timestamp').textContent = ts;
+
+  const html = `
+    <div class="fade-in">
+      <div class="field">
+        <div class="field-label">性別 Gender</div>
+        <div class="field-value">${gender.icon} ${gender.label}</div>
+      </div>
+
+      <div class="field">
+        <div class="field-label">姓名 Name</div>
+        <div class="field-value">
+          ${nameData.name}
+          <span class="sub"> — ${nameData.origin}：${nameData.meaning}</span>
+        </div>
+      </div>
+
+      <hr class="rule">
+
+      <div class="field">
+        <div class="field-label">種族 Race</div>
+        <div class="field-value">
+          ${race.name}
+          <span class="sub"> （${race.note}）</span>
+        </div>
+      </div>
+
+      <div class="field">
+        <div class="field-label">年齡 Age</div>
+        <div class="field-value">
+          ${age} 歲
+          <span class="sub"> — ${agePhase}</span>
+        </div>
+      </div>
+
+      <hr class="rule">
+
+      <div class="field">
+        <div class="field-label">個性 Traits</div>
+        <div class="field-value traits">
+          ${selectedTraits.map(t => `<span class="trait-tag">${t}</span>`).join('')}
+        </div>
+      </div>
+
+      <hr class="rule">
+
+      <div class="field">
+        <div class="field-label">志向 Aspiration</div>
+        <div class="field-value goal">${goal}</div>
+      </div>
+    </div>
+  `;
+
+  document.getElementById('result-area').innerHTML = html;
+}
+</script>
+</body>
+</html>
