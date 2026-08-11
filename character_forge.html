@@ -1,0 +1,551 @@
+<!DOCTYPE html>
+<html lang="zh-Hant">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>角色鍛造坊 Character Forge</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link href="https://fonts.googleapis.com/css2?family=Cinzel:wght@400;600;700&family=Cinzel+Decorative:wght@700&family=IM+Fell+English:ital@0;1&family=IM+Fell+English+SC&display=swap" rel="stylesheet">
+<style>
+  :root{
+    --parchment:#f2e6c9;
+    --parchment-dark:#e6d3a3;
+    --parchment-shadow:#c9b581;
+    --ink:#3a2a1a;
+    --ink-soft:#5c4630;
+    --gold:#b8892b;
+    --gold-light:#e0b959;
+    --wine:#7a2e2e;
+    --forest:#4a5a3a;
+  }
+  *{box-sizing:border-box;}
+  html,body{margin:0;padding:0;}
+  body{
+    min-height:100vh;
+    background:
+      radial-gradient(ellipse at top left, rgba(255,255,255,0.08), transparent 60%),
+      radial-gradient(ellipse at bottom right, rgba(0,0,0,0.12), transparent 60%),
+      repeating-linear-gradient(0deg, rgba(0,0,0,0.015) 0px, rgba(0,0,0,0.015) 1px, transparent 1px, transparent 3px),
+      var(--parchment);
+    color:var(--ink);
+    font-family:'IM Fell English', serif;
+    display:flex;
+    justify-content:center;
+    padding:32px 14px 60px;
+  }
+
+  .stage{
+    width:100%;
+    max-width:760px;
+  }
+
+  /* language toggle */
+  .langbar{
+    display:flex;
+    justify-content:flex-end;
+    margin-bottom:10px;
+  }
+  .langbtn{
+    font-family:'Cinzel', serif;
+    font-size:12px;
+    letter-spacing:1px;
+    background:var(--parchment-dark);
+    border:1px solid var(--gold);
+    color:var(--ink-soft);
+    padding:6px 14px;
+    border-radius:3px;
+    cursor:pointer;
+    transition:all .2s ease;
+  }
+  .langbtn:hover{background:var(--gold-light); color:var(--ink);}
+
+  /* ornate frame */
+  .frame{
+    position:relative;
+    background:
+      linear-gradient(160deg, rgba(255,255,255,0.15), transparent 40%),
+      var(--parchment);
+    border:1px solid var(--gold);
+    box-shadow:0 0 0 5px var(--parchment), 0 0 0 6px var(--gold), 0 18px 40px rgba(58,42,26,0.35);
+    padding:38px 30px 32px;
+  }
+  .frame::before, .frame::after,
+  .frame .corner-br, .frame .corner-bl{
+    content:"";
+    position:absolute;
+    width:26px; height:26px;
+    border:2px solid var(--gold);
+  }
+  .frame::before{ top:8px; left:8px; border-right:none; border-bottom:none; }
+  .frame::after{ top:8px; right:8px; border-left:none; border-bottom:none; }
+  .corner-br{ bottom:8px; right:8px; border-left:none; border-top:none; }
+  .corner-bl{ bottom:8px; left:8px; border-right:none; border-top:none; }
+
+  h1{
+    font-family:'Cinzel Decorative', serif;
+    text-align:center;
+    font-size:clamp(24px,4.5vw,34px);
+    color:var(--wine);
+    margin:0 0 4px;
+    letter-spacing:1px;
+  }
+  .subtitle{
+    text-align:center;
+    font-family:'IM Fell English SC', serif;
+    font-size:13px;
+    letter-spacing:3px;
+    color:var(--ink-soft);
+    text-transform:uppercase;
+    margin-bottom:26px;
+  }
+
+  .divider{
+    display:flex; align-items:center; gap:10px;
+    margin:30px 0 22px;
+    color:var(--gold);
+  }
+  .divider::before, .divider::after{
+    content:"";
+    flex:1;
+    height:1px;
+    background:linear-gradient(90deg, transparent, var(--gold), transparent);
+  }
+  .divider span{ font-size:18px; }
+
+  section h2{
+    font-family:'Cinzel', serif;
+    font-size:16px;
+    letter-spacing:2px;
+    color:var(--ink);
+    text-align:center;
+    margin:0 0 4px;
+  }
+  section .hint{
+    text-align:center;
+    font-size:13px;
+    color:var(--ink-soft);
+    font-style:italic;
+    margin:0 0 20px;
+  }
+
+  /* concept generator */
+  .concept-display{
+    display:flex;
+    flex-wrap:wrap;
+    justify-content:center;
+    gap:10px;
+    padding:20px 14px;
+    margin-bottom:18px;
+    background:rgba(255,255,255,0.25);
+    border:1px dashed var(--gold);
+    border-radius:4px;
+  }
+  .word{
+    cursor:pointer;
+    font-family:'Cinzel', serif;
+    font-weight:600;
+    font-size:clamp(17px,3.4vw,23px);
+    padding:6px 12px;
+    border-radius:3px;
+    transition:all .18s ease;
+    position:relative;
+    user-select:none;
+  }
+  .word .en{
+    display:block;
+    font-family:'IM Fell English', serif;
+    font-weight:400;
+    font-style:italic;
+    font-size:12px;
+    color:var(--ink-soft);
+    margin-top:2px;
+  }
+  .word.adj{ color:var(--forest); }
+  .word.noun{ color:var(--wine); }
+  .word.occ{ color:#8a5a1f; }
+  .word:hover{ background:rgba(184,137,43,0.18); transform:translateY(-1px); }
+  .word:hover::after{
+    content:"⟲";
+    position:absolute; top:-8px; right:-4px;
+    font-size:11px; color:var(--gold);
+  }
+  .word.spin{ animation:flicker .25s steps(2) infinite; }
+  @keyframes flicker{ 50%{ opacity:.35; } }
+
+  .btnrow{ display:flex; justify-content:center; gap:12px; flex-wrap:wrap; }
+  .mainbtn{
+    font-family:'Cinzel', serif;
+    letter-spacing:1px;
+    font-size:14px;
+    background:linear-gradient(180deg, var(--gold-light), var(--gold));
+    border:1px solid #8a6620;
+    color:#3a2a10;
+    padding:10px 22px;
+    border-radius:4px;
+    cursor:pointer;
+    box-shadow:0 2px 0 #8a6620;
+    transition:transform .12s ease, box-shadow .12s ease;
+  }
+  .mainbtn:hover{ transform:translateY(-1px); }
+  .mainbtn:active{ transform:translateY(1px); box-shadow:0 1px 0 #8a6620; }
+  .mainbtn.secondary{
+    background:linear-gradient(180deg,#fff,var(--parchment-dark));
+    border:1px solid var(--gold);
+    color:var(--ink-soft);
+    box-shadow:0 2px 0 var(--gold);
+  }
+
+  /* dice section */
+  .statgrid{
+    display:grid;
+    grid-template-columns:repeat(3,1fr);
+    gap:12px;
+    margin-bottom:20px;
+  }
+  @media (max-width:520px){
+    .statgrid{ grid-template-columns:repeat(2,1fr); }
+  }
+  .statcard{
+    background:rgba(255,255,255,0.3);
+    border:1px solid var(--gold);
+    border-radius:5px;
+    padding:12px 8px 10px;
+    text-align:center;
+    position:relative;
+    min-height:118px;
+  }
+  .statcard .label{
+    font-family:'Cinzel', serif;
+    font-weight:700;
+    font-size:13px;
+    letter-spacing:1px;
+    color:var(--wine);
+  }
+  .statcard .label .en{
+    display:block;
+    font-family:'IM Fell English', serif;
+    font-style:italic;
+    font-weight:400;
+    font-size:11px;
+    color:var(--ink-soft);
+  }
+  .statcard .total{
+    font-family:'Cinzel Decorative', serif;
+    font-size:30px;
+    color:var(--ink);
+    margin:4px 0 0;
+  }
+  .statcard .mod{
+    font-size:12px;
+    color:var(--forest);
+    font-family:'IM Fell English SC', serif;
+  }
+  .statcard .breakdown{
+    font-size:10px;
+    color:var(--ink-soft);
+    margin-top:5px;
+    letter-spacing:0.5px;
+  }
+  .statcard .breakdown .dropped{
+    text-decoration:line-through;
+    opacity:.45;
+  }
+  .statcard.rolling .total{ animation:flicker .12s steps(2) infinite; }
+
+  footer{
+    text-align:center;
+    font-size:11px;
+    color:var(--ink-soft);
+    margin-top:26px;
+    letter-spacing:1px;
+    font-style:italic;
+  }
+</style>
+</head>
+<body>
+<div class="stage">
+  <div class="langbar">
+    <button class="langbtn" id="langToggle">EN</button>
+  </div>
+
+  <div class="frame">
+    <div class="corner-br"></div><div class="corner-bl"></div>
+
+    <h1 id="mainTitle">角色鍛造坊</h1>
+    <div class="subtitle" id="mainSubtitle">CHARACTER FORGE</div>
+
+    <section id="conceptSection">
+      <h2 id="conceptTitle">概念產生器</h2>
+      <p class="hint" id="conceptHint">點擊任一詞彙可單獨重擲</p>
+
+      <div class="concept-display" id="conceptDisplay"></div>
+
+      <div class="btnrow">
+        <button class="mainbtn" id="rerollAllConcept">🎲 全部重新生成</button>
+      </div>
+    </section>
+
+    <div class="divider"><span>❦</span></div>
+
+    <section id="statSection">
+      <h2 id="statTitle">六圍擲骰</h2>
+      <p class="hint" id="statHint">每項屬性擲 4d6，捨去最低點數</p>
+
+      <div class="statgrid" id="statGrid"></div>
+
+      <div class="btnrow">
+        <button class="mainbtn secondary" id="rollAllStats">🎲 擲骰決定能力</button>
+      </div>
+    </section>
+
+    <footer id="footerNote">為角色設計與世界觀創作而生 · 可自由嵌入你的網站</footer>
+  </div>
+</div>
+
+<script>
+const DATA = {
+  adj: {
+    zh:["迷途的","破碎的","沉默的","貪婪的","遺忘的","熾熱的","冰封的","神秘的","疲憊的","高傲的",
+        "溫柔的","狡猾的","忠誠的","墮落的","虔誠的","流浪的","古老的","年輕的","受詛咒的","幸運的",
+        "憂鬱的","瘋狂的","優雅的","粗獷的","謹慎的","衝動的","沉思的","好奇的","冷酷的","溫暖的",
+        "沉睡的","甦醒的","破舊的","嶄新的","微光的","黯淡的","燦爛的","陰鬱的","歡快的","悲傷的",
+        "孤獨的","喧鬧的","寧靜的","狂野的","馴服的","野性的","文雅的","粗魯的","細膩的","笨拙的",
+        "敏銳的","遲鈍的","銳利的","柔軟的","堅硬的","脆弱的","堅韌的","虛弱的","強壯的","矮小的",
+        "巨大的","渺小的","透明的","朦朧的","清晰的","模糊的","鮮豔的","褪色的","鏽蝕的","嶄亮的",
+        "隱形的","發光的","漂浮的","沉重的","輕盈的","扭曲的","筆直的","彎曲的","破裂的","完整的",
+        "殘缺的","豐饒的","貧瘠的","富裕的","潦倒的","尊貴的","卑微的","神聖的","邪惡的","中立的",
+        "遙遠的","鄰近的","深邃的","淺薄的","古怪的","尋常的","罕見的","常見的","秘密的","公開的"],
+    en:["Lost","Broken","Silent","Greedy","Forgotten","Blazing","Frozen","Mysterious","Weary","Proud",
+        "Gentle","Cunning","Loyal","Fallen","Devout","Wandering","Ancient","Young","Cursed","Lucky",
+        "Melancholic","Mad","Elegant","Rugged","Cautious","Impulsive","Pensive","Curious","Cold-hearted","Warm-hearted",
+        "Slumbering","Awakened","Worn","Brand-new","Glimmering","Dim","Radiant","Gloomy","Cheerful","Sorrowful",
+        "Lonesome","Boisterous","Tranquil","Feral","Tamed","Wild","Refined","Coarse","Delicate","Clumsy",
+        "Keen","Dull","Sharp","Soft","Hardened","Fragile","Resilient","Frail","Mighty","Diminutive",
+        "Colossal","Tiny","Translucent","Hazy","Lucid","Blurred","Vivid","Faded","Rusted","Gleaming",
+        "Unseen","Luminous","Floating","Heavy","Weightless","Twisted","Upright","Bent","Cracked","Whole",
+        "Incomplete","Bountiful","Barren","Wealthy","Destitute","Noble","Humble","Sacred","Wicked","Neutral",
+        "Distant","Nearby","Fathomless","Shallow","Peculiar","Ordinary","Rare","Common","Secretive","Overt"]
+  },
+  noun: {
+    zh:["狐狸","烏鴉","鹿","熊","蜥蜴","貓頭鷹","狼","水獺","山羊","蛇",
+        "鯨魚","螢火蟲","蝴蝶","懷錶","羅盤","燭台","鑰匙","古鐘","面具","書籍",
+        "鏡子","骰子","提燈","齒輪","墨水瓶","紙鶴","徽章","骸骨","貓","兔子",
+        "烏龜","螃蟹","水母","章魚","蜘蛛","蜻蜓","蝸牛","刺蝟","松鼠","浣熊",
+        "孔雀","天鵝","鴿子","喜鵲","蟾蜍","青蛙","螳螂","蜜蜂","飛蛾","甲蟲",
+        "羽毛筆","墨硯","信封","蠟燭","油燈","望遠鏡","沙漏","懷爐","銅鈴","銀匙",
+        "護符","水晶球","煉金瓶","卷軸","地圖","鐵鍊","鎖頭","盾牌","長劍","匕首",
+        "弓箭","魔杖","法杖","寶石","珍珠","琥珀","貝殼","珊瑚","礦石","隕石",
+        "花瓣","枯枝","苔蘚","蕈菇","種子","根莖","松果","橡實","羽毛","蛛絲",
+        "陶罐","茶壺","酒瓶","鳥籠","風箏","鐘擺","織布機","紡車","調色盤","畫筆"],
+    en:["Fox","Raven","Deer","Bear","Lizard","Owl","Wolf","Otter","Goat","Serpent",
+        "Whale","Firefly","Butterfly","Pocket Watch","Compass","Candlestick","Key","Old Clock","Mask","Book",
+        "Mirror","Die","Lantern","Gear","Inkwell","Paper Crane","Badge","Bone","Cat","Rabbit",
+        "Turtle","Crab","Jellyfish","Octopus","Spider","Dragonfly","Snail","Hedgehog","Squirrel","Raccoon",
+        "Peacock","Swan","Dove","Magpie","Toad","Frog","Mantis","Bee","Moth","Beetle",
+        "Quill","Inkstone","Envelope","Candle","Oil Lamp","Telescope","Hourglass","Hand Warmer","Bronze Bell","Silver Spoon",
+        "Talisman","Crystal Ball","Alchemy Flask","Scroll","Map","Chain","Padlock","Shield","Longsword","Dagger",
+        "Bow","Wand","Staff","Gem","Pearl","Amber","Seashell","Coral","Ore","Meteorite",
+        "Petal","Dead Branch","Moss","Mushroom","Seed","Root","Pinecone","Acorn","Feather","Spider Silk",
+        "Clay Pot","Teapot","Wine Bottle","Birdcage","Kite","Pendulum","Loom","Spinning Wheel","Palette","Paintbrush"]
+  },
+  occ: {
+    zh:["圖書館員","鍊金術士","吟遊詩人","鐘錶匠","藥草師","占卜師","鐵匠","獵人","商人","抄寫員",
+        "守墓人","燈塔看守人","馴獸師","織工","廚師","船長","學者","傭兵","盜賊","魔法師",
+        "治療師","園丁","郵差","鎖匠","樂師","裁縫","石匠","嚮導","修復師","收藏家",
+        "製圖師","馴鷹師","養蜂人","釀酒師","製陶師","雕刻師","染織師","馴馬師","獸醫","礦工",
+        "木匠","玻璃工匠","珠寶匠","製箭師","弓匠","盔甲師","馴龍師","馭風者","占星師","煉丹師",
+        "譯者","說書人","信使","商船水手","漁夫","牧羊人","養蠶人","茶師","調香師","織夢者",
+        "守夜人","巡邏者","審判官","史官","測繪師","地質學家","植物學家","昆蟲學家","標本師","考古學家",
+        "傀儡師","面具師","燈籠匠","鐘樓管理員","鎖鏈匠","琴師","舞者","雜耍藝人","馭獸商","魔像工匠",
+        "藥劑師","毒師","解謎人","尋寶者","墓穴探索者","遺跡學者","符文師","咒術師","召喚師","馴靈師",
+        "旅店老闆","釀蜜人","製燭師","製傘匠","鐘表修理師","古董商","舊書商","裝訂師","插畫師","印刷師"],
+    en:["Librarian","Alchemist","Bard","Clockmaker","Herbalist","Diviner","Blacksmith","Hunter","Merchant","Scribe",
+        "Gravekeeper","Lighthouse Keeper","Beast Tamer","Weaver","Cook","Captain","Scholar","Mercenary","Thief","Sorcerer",
+        "Healer","Gardener","Courier","Locksmith","Musician","Tailor","Mason","Guide","Restorer","Collector",
+        "Cartographer","Falconer","Beekeeper","Brewer","Potter","Carver","Dyer","Horse Trainer","Veterinarian","Miner",
+        "Carpenter","Glassblower","Jeweler","Fletcher","Bowyer","Armorer","Dragon Tamer","Windrider","Astrologer","Elixirist",
+        "Translator","Storyteller","Messenger","Sailor","Fisherman","Shepherd","Silk Farmer","Tea Master","Perfumer","Dreamweaver",
+        "Night Watchman","Patroller","Inquisitor","Chronicler","Surveyor","Geologist","Botanist","Entomologist","Taxidermist","Archaeologist",
+        "Puppeteer","Mask Maker","Lanternsmith","Bell Tower Keeper","Chainsmith","Harpist","Dancer","Juggler","Beast Trader","Golem Crafter",
+        "Apothecary","Poisoner","Riddler","Treasure Hunter","Tomb Delver","Ruins Scholar","Rune Smith","Enchanter","Summoner","Spirit Tamer",
+        "Innkeeper","Honey Gatherer","Candlemaker","Umbrella Maker","Clock Repairer","Antiques Dealer","Used Book Dealer","Bookbinder","Illustrator","Printer"]
+  }
+};
+
+const STATS = [
+  {key:"str", zh:"力量", en:"STR · Strength"},
+  {key:"dex", zh:"敏捷", en:"DEX · Dexterity"},
+  {key:"con", zh:"體質", en:"CON · Constitution"},
+  {key:"int", zh:"智力", en:"INT · Intelligence"},
+  {key:"wis", zh:"感知", en:"WIS · Wisdom"},
+  {key:"cha", zh:"魅力", en:"CHA · Charisma"}
+];
+
+const TEXT = {
+  zh:{
+    title:"角色鍛造坊", subtitle:"CHARACTER FORGE",
+    conceptTitle:"概念產生器", conceptHint:"點擊任一詞彙可單獨重擲",
+    rerollAll:"🎲 全部重新生成",
+    statTitle:"六圍擲骰", statHint:"每項屬性擲 4d6，捨去最低點數",
+    rollStats:"🎲 擲骰決定能力",
+    footer:"為角色設計與世界觀創作而生 · 可自由嵌入你的網站",
+    langBtn:"EN"
+  },
+  en:{
+    title:"Character Forge", subtitle:"角色鍛造坊",
+    conceptTitle:"Concept Generator", conceptHint:"Click any word to reroll it alone",
+    rerollAll:"🎲 Reroll All",
+    statTitle:"Ability Score Roll", statHint:"Each stat rolls 4d6, drop the lowest",
+    rollStats:"🎲 Roll Abilities",
+    footer:"Built for character & worldbuilding design · free to embed",
+    langBtn:"中"
+  }
+};
+
+let lang = "zh";
+let current = { adj:0, noun:0, occ:0 };
+let statResults = {}; // key -> {rolls:[..], dropped:idx, total, mod}
+
+function rand(n){ return Math.floor(Math.random()*n); }
+
+function pickIndex(category){
+  current[category] = rand(DATA[category].zh.length);
+}
+
+function renderConcept(){
+  const el = document.getElementById('conceptDisplay');
+  el.innerHTML = "";
+  const order = ["adj","noun","occ"];
+  const cls = {adj:"adj", noun:"noun", occ:"occ"};
+  order.forEach(cat=>{
+    const zhWord = DATA[cat].zh[current[cat]];
+    const enWord = DATA[cat].en[current[cat]];
+    const span = document.createElement('span');
+    span.className = "word " + cls[cat];
+    span.dataset.cat = cat;
+    if(lang === "zh"){
+      span.innerHTML = zhWord + '<span class="en">'+enWord+'</span>';
+    } else {
+      span.innerHTML = enWord + '<span class="en">'+zhWord+'</span>';
+    }
+    span.title = lang==="zh" ? "點擊重擲此詞" : "Click to reroll";
+    span.addEventListener('click', ()=> rerollOne(cat, span));
+    el.appendChild(span);
+  });
+}
+
+function rerollOne(cat, span){
+  span.classList.add('spin');
+  let ticks = 0;
+  const iv = setInterval(()=>{
+    pickIndex(cat);
+    renderConceptWordOnly(cat, span);
+    ticks++;
+    if(ticks > 6){
+      clearInterval(iv);
+      span.classList.remove('spin');
+    }
+  }, 55);
+}
+
+function renderConceptWordOnly(cat, span){
+  const zhWord = DATA[cat].zh[current[cat]];
+  const enWord = DATA[cat].en[current[cat]];
+  if(lang === "zh"){
+    span.innerHTML = zhWord + '<span class="en">'+enWord+'</span>';
+  } else {
+    span.innerHTML = enWord + '<span class="en">'+zhWord+'</span>';
+  }
+}
+
+function rerollAllConcept(){
+  ["adj","noun","occ"].forEach(cat=> pickIndex(cat));
+  renderConcept();
+}
+
+function rollOneStat(){
+  const rolls = [rand(6)+1, rand(6)+1, rand(6)+1, rand(6)+1];
+  let minVal = Math.min(...rolls);
+  let droppedIdx = rolls.indexOf(minVal);
+  const total = rolls.reduce((a,b)=>a+b,0) - minVal;
+  const mod = Math.floor((total-10)/2);
+  return { rolls, droppedIdx, total, mod };
+}
+
+function renderStatGrid(){
+  const grid = document.getElementById('statGrid');
+  grid.innerHTML = "";
+  STATS.forEach(s=>{
+    const card = document.createElement('div');
+    card.className = "statcard";
+    card.id = "stat-" + s.key;
+    const res = statResults[s.key];
+    const label = lang === "zh" ? s.zh : s.en.split(" · ")[0];
+    const labelSub = lang === "zh" ? s.en : s.zh;
+    let totalHTML = "—";
+    let modHTML = "";
+    let breakdownHTML = lang==="zh" ? "尚未擲骰" : "not rolled yet";
+    if(res){
+      totalHTML = res.total;
+      modHTML = (res.mod>=0? "+":"") + res.mod;
+      breakdownHTML = res.rolls.map((r,i)=> i===res.droppedIdx ? '<span class="dropped">'+r+'</span>' : r).join(" · ");
+    }
+    card.innerHTML = `
+      <div class="label">${label}<span class="en">${labelSub}</span></div>
+      <div class="total">${totalHTML}</div>
+      <div class="mod">${modHTML}</div>
+      <div class="breakdown">${breakdownHTML}</div>
+    `;
+    grid.appendChild(card);
+  });
+}
+
+function rollAllStats(){
+  STATS.forEach(s=>{
+    const card = document.getElementById('stat-' + s.key);
+    if(card) card.classList.add('rolling');
+  });
+  let ticks = 0;
+  const iv = setInterval(()=>{
+    STATS.forEach(s=>{ statResults[s.key] = rollOneStat(); });
+    renderStatGrid();
+    ticks++;
+    if(ticks > 5){
+      clearInterval(iv);
+      document.querySelectorAll('.statcard').forEach(c=>c.classList.remove('rolling'));
+    }
+  }, 70);
+}
+
+function applyLangText(){
+  const t = TEXT[lang];
+  document.getElementById('mainTitle').textContent = t.title;
+  document.getElementById('mainSubtitle').textContent = t.subtitle;
+  document.getElementById('conceptTitle').textContent = t.conceptTitle;
+  document.getElementById('conceptHint').textContent = t.conceptHint;
+  document.getElementById('rerollAllConcept').textContent = t.rerollAll;
+  document.getElementById('statTitle').textContent = t.statTitle;
+  document.getElementById('statHint').textContent = t.statHint;
+  document.getElementById('rollAllStats').textContent = t.rollStats;
+  document.getElementById('footerNote').textContent = t.footer;
+  document.getElementById('langToggle').textContent = t.langBtn;
+  document.documentElement.lang = lang === "zh" ? "zh-Hant" : "en";
+}
+
+document.getElementById('langToggle').addEventListener('click', ()=>{
+  lang = lang === "zh" ? "en" : "zh";
+  applyLangText();
+  renderConcept();
+  renderStatGrid();
+});
+
+document.getElementById('rerollAllConcept').addEventListener('click', rerollAllConcept);
+document.getElementById('rollAllStats').addEventListener('click', rollAllStats);
+
+// init
+rerollAllConcept();
+renderStatGrid();
+applyLangText();
+</script>
+</body>
+</html>
